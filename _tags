@@ -1,0 +1,19 @@
+true: \
+    bin_annot, \
+    eliom_ppx, \
+    package(lwt lwt.ppx), \
+    package(prime), \
+    package(react)
+
+<web/server/*>: thread, \
+    package(caqti caqti-dynload caqti-lwt), \
+    package(eliom.server), \
+    package(panograph.server), \
+    package(ppx_deriving js_of_ocaml-ppx.deriving), \
+    package(subsocia subsocia.data)
+
+<web/client/*>: \
+    package(eliom.client), \
+    package(js_of_ocaml.ppx), \
+    package(panograph.client), \
+    package(subsocia)

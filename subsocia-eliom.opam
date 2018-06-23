@@ -1,0 +1,28 @@
+opam-version: "1.2"
+name: "subsocia-eliom"
+author: "Petter A. Urkedal <paurkedal@gmail.com>"
+maintainer: "Petter A. Urkedal <paurkedal@gmail.com>"
+homepage: "https://github.com/paurkedal/subsocia-eliom/"
+bug-reports: "https://github.com/paurkedal/subsocia-eliom/issues"
+dev-repo: "https://github.com/paurkedal/subsocia-eliom.git"
+license: "LGPL-3 with OCaml linking exception"
+
+build: ["ocaml" "pkg/pkg.ml" "build" "--pinned" "%{pinned}%"]
+depends: [
+  "adpkg" {build}
+  "caqti"
+  "caqti-dynload"
+  "caqti-lwt"
+  "eliom" {>= "6.0" & < "7.0"}
+  "js_of_ocaml"
+  "js_of_ocaml-ppx"
+  "lwt"
+  "ocamlbuild" {build}
+  "ocamlfind"
+  "panograph"
+  "ppx_deriving"
+  "prime"
+  "react"
+  "subsocia"
+  "topkg" {build}
+]

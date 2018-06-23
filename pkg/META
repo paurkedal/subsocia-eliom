@@ -1,0 +1,39 @@
+description = "Eliom-based web interface to Subsocia"
+version = "%%VERSION_NUM%%"
+requires = ""
+
+package "server" (
+  version = "%%VERSION_NUM%%"
+  description = "People, organization, and authorization"
+  requires = "eliom.server panograph.server prime subsocia subsocia.data"
+  directory = "web/server"
+  archive(byte) = "subsocia-eliom-server.cma"
+  archive(native) = "subsocia-eliom-server.cmxa"
+  plugin(byte) = "subsocia-eliom-server.cma"
+  plugin(native) = "subsocia-eliom-server.cmxs"
+  exists_if = "subsocia-eliom-server.cma"
+)
+
+package "module" (
+  version = "%%VERSION_NUM%%"
+  description = "People, organization, and authorization"
+  requires = "subsocia-eliom.server"
+  directory = "web/server"
+  archive(byte) = "subsocia-eliom-module.cma"
+  archive(native) = "subsocia-eliom-module.cmxa"
+  plugin(byte) = "subsocia-eliom-module.cma"
+  plugin(native) = "subsocia-eliom-module.cmxs"
+  exists_if = "subsocia-eliom-module.cma"
+)
+
+package "debug-module" (
+  version = "%%VERSION_NUM%%"
+  description = "People, organization, and authorization"
+  requires = "eliom.server"
+  directory = "web/server"
+  archive(byte) = "subsocia-eliom-debug-module.cma"
+  archive(native) = "subsocia-eliom-debug-module.cmx"
+  plugin(byte) = "subsocia-eliom-debug-module.cma"
+  plugin(native) = "subsocia-eliom-debug-module.cmxs"
+  exists_if = "subsocia-eliom-debug-module.cma"
+)
