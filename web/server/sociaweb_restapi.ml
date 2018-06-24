@@ -89,9 +89,9 @@ let _ =
         | Some group -> Entity.is_sub user group in
       let get_attribute an =
         if not (String_set.mem an allowed_ans) then Lwt.return_none else
-        match%lwt Attribute_type.of_name an with
-        | None -> Lwt.return_none
-        | Some (Attribute_type.Ex at) ->
+        match%lwt Attribute_type.any_of_name_exn an with
+        | exception Caqti_error.Exn _ -> Lwt.return_none
+        | Attribute_type.Any at ->
           let vt = Attribute_type.value_type at in
           let%lwt vs = Entity.get_values at root user in
           let vs = Values.elements vs in

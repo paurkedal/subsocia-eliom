@@ -89,7 +89,7 @@ open Subsocia_connection
     let%lwt ubt = Entity.entity_type ub in
     let%lwt ats = Entity_type.allowed_attributes ubt lbt in
     let ats = Attribute_type.Set.elements ats in
-    let render_tr (Attribute_type.Ex at) =
+    let render_tr (Attribute_type.Any at) =
       let%lwt an = Attribute_type.name at in
       let mu = Attribute_type.value_mult at in
       let%lwt value_frag =
