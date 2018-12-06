@@ -31,6 +31,27 @@ open Subsocia_connection
 ]
 
 [%%server
+
+  module Int32_hashable = struct
+    type t = int32
+    let equal = (=)
+    let hash = Hashtbl.hash
+  end
+  module Int32_event_table = Panograph_event_table.Make (Int32_hashable)
+
+  let entity_changed =
+    let event_table = Int32_event_table.create 97 in
+    on_entity_change begin function
+     | `Force_dsub (e1, e2) | `Relax_dsub (e1, e2) | `Change_values (e1, e2) ->
+        Lwt.async begin fun () ->
+          let%lwt e1_id = Entity.soid e1 and e2_id = Entity.soid e2 in
+          Int32_event_table.emit event_table e1_id ();
+          Int32_event_table.emit event_table e2_id ();
+          Lwt.return_unit
+        end
+    end;
+    Int32_event_table.event event_table
+
   let suggested_number_of_columns es =
     let n = List.length es in
     if n = 0 then 1 else
@@ -181,7 +202,7 @@ let entity_handler entity_id_opt () =
     | ets -> Entity.entity_type e >>= Entity_type.name >|=
              fun et -> List.mem et ets in
   let%lwt browser_div = render_browser ~enable_edit ~cri e in
-  let entity_changed_c = Eliom_react.Down.of_react (entity_changed e) in
+  let entity_changed_c = Eliom_react.Down.of_react (entity_changed entity_id) in
   ignore_cv [%client
     Lwt_react.E.keep @@ React.E.trace
       (fun _ ->
