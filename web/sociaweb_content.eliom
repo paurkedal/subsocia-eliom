@@ -82,7 +82,7 @@ let complete_helper entity_type_id super_id words_str =
   let%lwt can_search =
     (match super with
      | None ->
-        let%lwt root = Entity.root in
+        let%lwt root = Entity.get_root () in
         Entity.can_search_below operator root
      | Some super ->
         Entity.can_search_below operator super)
@@ -95,7 +95,7 @@ let complete_helper entity_type_id super_id words_str =
    | Some fts ->
       let cutoff = Sociaweb_config.completion_cutoff#get in
       let limit = Sociaweb_config.completion_limit#get in
-      let%lwt root = Entity.root in
+      let%lwt root = Entity.get_root () in
       Lwt_result.ok
         @@ Entity.image1_fts ?entity_type ?super ~cutoff ~limit fts root)
 

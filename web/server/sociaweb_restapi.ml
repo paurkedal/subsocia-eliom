@@ -77,7 +77,7 @@ let _ =
   Lwt_log.debug_f
     "Checking %s against [%s] and optional [%s] groups"
     subject (String.concat ", " must) (String.concat ", " may) >>= fun () ->
-  let%lwt root = Entity.root in
+  let%lwt root = Entity.get_root () in
   let allowed_ans = Lazy.force allowed_attributes in
   let%lwt must_ok, may_ok, query_res =
     match%lwt selected_entity subject with
