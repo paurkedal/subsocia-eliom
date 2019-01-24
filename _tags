@@ -1,7 +1,7 @@
 true: \
     bin_annot, \
     eliom_ppx, \
-    package(lwt lwt.ppx), \
+    package(lwt lwt_log.core lwt_ppx), \
     package(prime), \
     package(react)
 

@@ -1,4 +1,4 @@
-(* Copyright (C) 2014--2018  Petter A. Urkedal <paurkedal@gmail.com>
+(* Copyright (C) 2014--2019  Petter A. Urkedal <paurkedal@gmail.com>
  *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -94,7 +94,7 @@ open Subsocia_connection
           ("+", add, Some [F.a_class ["candidate"]]) in
       let button =
         F.Raw.button ~a:[F.a_button_type `Button; F.a_onclick handler]
-                     [F.pcdata label] in
+                     [F.txt label] in
       Lwt.return (F.td ?a [button; link])
 
   let rec fold_closure_from f dsucc x acc =
@@ -117,11 +117,11 @@ open Subsocia_connection
         let t1 = Attribute_type.value_type at in
         Entity.get_values at ub lb >|= fun vs ->
         match List.map (Value.typed_to_string t1) (Values.elements vs) with
-        | [] -> [F.span ~a:[F.a_class ["none"]] [F.pcdata "-"]]
-        | strs -> [F.pcdata (String.concat ", " strs)] in
+        | [] -> [F.span ~a:[F.a_class ["none"]] [F.txt "-"]]
+        | strs -> [F.txt (String.concat ", " strs)] in
       Lwt.return @@ F.tr [
-        F.td [F.pcdata an; F.sup [F.pcdata (Multiplicity.to_string mu)];
-              F.pcdata ":"];
+        F.td [F.txt an; F.sup [F.txt (Multiplicity.to_string mu)];
+              F.txt ":"];
         F.td value_frag;
       ] in
     let%lwt attr_trs = Lwt_list.map_s render_tr ats in
@@ -129,7 +129,7 @@ open Subsocia_connection
     Lwt.return
       (if attr_trs = []
        then None
-       else Some (F.tr [F.td []; F.th [F.pcdata ub_name]] :: attr_trs))
+       else Some (F.tr [F.td []; F.th [F.txt ub_name]] :: attr_trs))
 
   let render_dsuper ~cri ~enable_edit focus =
     let is_relevant csuper =
@@ -145,7 +145,7 @@ open Subsocia_connection
       let csuper_block = multicol_tds ~m ~cls:["soc-dsuper1"] csuper_frags in
       Lwt.return @@
         F.table ~a:[F.a_class ["soc-layout"]]
-          [F.tr [F.th [F.pcdata "Membership Management"]];
+          [F.tr [F.th [F.txt "Membership Management"]];
            F.tr [F.td [csuper_block]]]
     else
       let%lwt dsupers = Entity.dsuper focus in
@@ -154,7 +154,7 @@ open Subsocia_connection
       let dsuper_block = multicol ~m ~cls:["soc-dsuper1"] dsuper_frags in
       Lwt.return @@
         F.table ~a:[F.a_class ["soc-layout"]]
-          [F.tr [F.th [F.pcdata "Member of"]];
+          [F.tr [F.th [F.txt "Member of"]];
            F.tr [F.td [dsuper_block]]]
 
   let render_browser ~cri ?(enable_edit = true) ent =
@@ -171,7 +171,7 @@ open Subsocia_connection
     let%lwt dsuper_frag = render_dsuper ~cri ~enable_edit ent in
     Lwt.return @@ F.div ~a:[F.a_class ["soc-entity-browser"]] [
       dsuper_frag;
-      F.div ~a:[F.a_class ["soc-box"; "focus"; "top"]] [F.pcdata name];
+      F.div ~a:[F.a_class ["soc-box"; "focus"; "top"]] [F.txt name];
       F.div ~a:[F.a_class ["soc-box"; "focus"; "middle"; "content"]]
             [attr_table];
       F.div ~a:[F.a_class ["soc-box"; "focus"; "bottom"; "content"]]
@@ -218,7 +218,7 @@ let entity_handler entity_id_opt () =
   ] in
   let%lwt search_inp, _search_handle = entity_completion_input do_search in
   let search_div = F.div ~a:[F.a_class ["soc-search"]] [
-    F.label [F.pcdata "Search"]; F.br ();
+    F.label [F.txt "Search"]; F.br ();
     search_inp;
   ] in
   Lwt.return @@

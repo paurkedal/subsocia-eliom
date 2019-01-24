@@ -1,4 +1,4 @@
-(* Copyright (C) 2015--2018  Petter A. Urkedal <paurkedal@gmail.com>
+(* Copyright (C) 2015--2019  Petter A. Urkedal <paurkedal@gmail.com>
  *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -24,15 +24,15 @@ open Subsocia_connection
 let registration_form (first_name, (last_name, email)) =
   [F.table ~a:[F.a_class ["assoc"]] [
     F.tr [
-      F.th [F.pcdata "First name:"];
+      F.th [F.txt "First name:"];
       F.td [F.Form.input ~input_type:`Text ~name:first_name F.Form.string];
     ];
     F.tr [
-      F.th [F.pcdata "Last name:"];
+      F.th [F.txt "Last name:"];
       F.td [F.Form.input ~input_type:`Text ~name:last_name F.Form.string];
     ];
     F.tr [
-      F.th [F.pcdata "Email:"];
+      F.th [F.txt "Email:"];
       F.td [F.Form.input ~input_type:`Email ~name:email F.Form.string];
     ];
     F.tr [
@@ -49,7 +49,7 @@ let () =
       ~title:"Registration"
       ~css:[["css"; "subsocia.css"]]
       (F.body [
-        F.h1 [F.pcdata "Registration"];
+        F.h1 [F.txt "Registration"];
         F.Form.post_form ~service:registration_post_service
                          registration_form ();
       ])
@@ -80,10 +80,10 @@ let () =
       ~title:"Welcome"
       ~css:[["css"; "subsocia.css"]]
       (F.body [
-        F.h1 [F.pcdata "Welcome, "; F.pcdata first_name];
+        F.h1 [F.txt "Welcome, "; F.txt first_name];
         F.p [
           F.a ~service:entities_service
-            [F.pcdata "Your registration is complete."]
+            [F.txt "Your registration is complete."]
             (Some e_new_user_id);
         ];
       ])

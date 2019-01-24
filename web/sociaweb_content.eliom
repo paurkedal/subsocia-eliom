@@ -1,4 +1,4 @@
-(* Copyright (C) 2015--2018  Petter A. Urkedal <paurkedal@gmail.com>
+(* Copyright (C) 2015--2019  Petter A. Urkedal <paurkedal@gmail.com>
  *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -56,7 +56,7 @@
   let entity_link ~langs ent =
     let%lwt id = Entity.soid ent in
     let%lwt name = Entity.display_name ~langs ent in
-    Lwt.return (F.a ~service:entities_service [F.pcdata name] (Some id))
+    Lwt.return (F.a ~service:entities_service [F.txt name] (Some id))
 ]
 
 [%%shared

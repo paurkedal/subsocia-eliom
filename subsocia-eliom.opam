@@ -11,10 +11,10 @@ depends: [
   "caqti"
   "caqti-dynload"
   "caqti-lwt"
-  "eliom" {>= "6.0" & < "7.0"}
-  "js_of_ocaml"
+  "eliom" {>= "6.6" & < "7.0~"}
+  "js_of_ocaml" {>= "3.3"}
   "js_of_ocaml-ppx"
-  "lwt"
+  "lwt" "lwt_log" "lwt_ppx"
   "ocamlbuild" {build}
   "ocamlfind"
   "panograph"
