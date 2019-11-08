@@ -1,28 +1,34 @@
 <ocsigen>
   <server>
+
     <debugmode/>
     <port>127.0.0.1:8080</port>
     <logdir>_var/log</logdir>
     <datadir>_var/lib</datadir>
     <charset>utf-8</charset>
     <commandpipe>_var/run/command.pipe</commandpipe>
+
     <extension findlib-package="ocsigenserver.ext.staticmod"/>
     <extension findlib-package="ocsigenserver.ext.ocsipersist-sqlite"/>
     <extension findlib-package="ocsigenserver.ext.redirectmod"/>
-    <extension findlib-package="config-file"/>
-    <extension findlib-package="eliom.server"/>
-    <extension findlib-package="prime"/>
-    <extension findlib-package="prime.unstable"/>
     <extension findlib-package="caqti"/>
     <extension findlib-package="caqti-driver-postgresql"/>
     <extension findlib-package="caqti-lwt"/>
-    <extension findlib-package="extunix"/>
+    <extension findlib-package="config-file"/>
+    <extension findlib-package="eliom.server"/>
+    <extension findlib-package="js_of_ocaml.deriving"/>
+    <extension findlib-package="lwt"/>
+    <extension findlib-package="lwt_log.core"/>
+    <extension findlib-package="lwt_ppx"/>
     <extension findlib-package="panograph"/>
     <extension findlib-package="panograph.server"/>
-    <extension findlib-package="yojson"/>
+    <extension findlib-package="prime"/>
+    <extension findlib-package="prime.unstable"/>
+    <extension findlib-package="react"/>
     <extension findlib-package="subsocia"/>
     <extension findlib-package="subsocia.data"/>
     <library module="_build/web/server/subsocia-eliom-server.cmxs"/>
+
     <host defaulthostname="localhost" hostfilter="*">
       <static dir="@PANOGRAPH_DATADIR@/static"/>
       <static dir="web/static"/>
@@ -33,5 +39,6 @@
       <redirect suburl="^/?\$" dest="http://localhost:8080/entities/self"/>
       <eliom/>
     </host>
+
   </server>
 </ocsigen>

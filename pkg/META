@@ -5,7 +5,23 @@ requires = ""
 package "server" (
   version = "%%VERSION_NUM%%"
   description = "People, organization, and authorization"
-  requires = "eliom.server panograph.server prime subsocia subsocia.data"
+  requires = "
+    caqti
+    caqti-lwt
+    config-file
+    eliom.server
+    js_of_ocaml.deriving
+    lwt
+    lwt_log.core
+    lwt_ppx
+    panograph
+    panograph.server
+    prime
+    prime.unstable
+    react
+    subsocia
+    subsocia.data
+  "
   directory = "web/server"
   archive(byte) = "subsocia-eliom-server.cma"
   archive(native) = "subsocia-eliom-server.cmxa"

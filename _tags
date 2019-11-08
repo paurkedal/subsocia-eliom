@@ -1,19 +1,31 @@
-true: \
-    bin_annot, \
-    eliom_ppx, \
-    package(lwt lwt_log.core lwt_ppx), \
-    package(prime), \
-    package(react)
+true: bin_annot, eliom_ppx
 
 <web/server/*>: thread, \
-    package(caqti caqti-dynload caqti-lwt), \
+    package(caqti), \
+    package(caqti-lwt), \
+    package(config-file), \
     package(eliom.server), \
+    package(js_of_ocaml-ppx_deriving_json), \
+    package(lwt), \
+    package(lwt_log.core), \
+    package(lwt_ppx), \
+    package(panograph), \
     package(panograph.server), \
-    package(ppx_deriving js_of_ocaml-ppx.deriving), \
-    package(subsocia subsocia.data)
+    package(prime), \
+    package(prime.unstable), \
+    package(react), \
+    package(subsocia), \
+    package(subsocia.data)
 
 <web/client/*>: \
     package(eliom.client), \
-    package(js_of_ocaml.ppx), \
+    package(js_of_ocaml-ppx), \
+    package(lwt), \
+    package(lwt_log.core), \
+    package(lwt_ppx), \
+    package(panograph), \
     package(panograph.client), \
+    package(prime), \
+    package(prime.unstable), \
+    package(react), \
     package(subsocia)

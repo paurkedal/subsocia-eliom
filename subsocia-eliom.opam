@@ -6,19 +6,20 @@ license: "LGPL-3 with OCaml linking exception"
 homepage: "https://github.com/paurkedal/subsocia-eliom/"
 bug-reports: "https://github.com/paurkedal/subsocia-eliom/issues"
 depends: [
-  "ocaml"
   "adpkg" {build}
   "caqti"
-  "caqti-dynload"
   "caqti-lwt"
   "eliom" {>= "6.6" & < "7.0~"}
   "js_of_ocaml" {>= "3.3"}
   "js_of_ocaml-ppx"
-  "lwt" "lwt_log" "lwt_ppx"
+  "js_of_ocaml-ppx_deriving_json"
+  "lwt"
+  "lwt_log"
+  "lwt_ppx"
+  "ocaml"
   "ocamlbuild" {build}
   "ocamlfind"
   "panograph"
-  "ppx_deriving"
   "prime"
   "react"
   "subsocia" {>= "0.18~"}
