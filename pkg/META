@@ -10,7 +10,10 @@ package "server" (
     caqti-lwt
     config-file
     eliom.server
+    fmt
     js_of_ocaml.deriving
+    logs
+    logs.lwt
     lwt
     lwt_log.core
     lwt_ppx
@@ -18,6 +21,8 @@ package "server" (
     panograph.server
     prime
     prime.unstable
+    ptime
+    ptime.clock.os
     react
     subsocia
     subsocia.data

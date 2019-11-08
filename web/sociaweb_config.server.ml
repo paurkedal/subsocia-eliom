@@ -1,4 +1,4 @@
-(* Copyright (C) 2015--2018  Petter A. Urkedal <paurkedal@gmail.com>
+(* Copyright (C) 2015--2019  Petter A. Urkedal <paurkedal@gmail.com>
  *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -60,6 +60,14 @@ let completion_limit =
     ["completion_limit"] 10
     "Maximum number of results to return for full-text search in web \
      interface."
+
+let change_log =
+  new Config_file.option_cp Config_file.string_wrappers ~group
+    ["change_log"] None
+    "If set, the path to which to log Subsocia changes requested though the \
+     web interface. \
+     A relative path is taken to be relative to the OCSIGEN log directory. \
+     If unset, the default logs reporter will be used."
 
 let () =
   try group#read (Sys.getenv "SUBSOCIA_ELIOM_CONFIG")

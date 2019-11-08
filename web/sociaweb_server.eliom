@@ -15,10 +15,9 @@
  *)
 
 open Lwt.Infix
+open Sociaweb_logging
 open Sociaweb_request
 open Subsocia_connection
-
-let change_section = Lwt_log.Section.make "subsocia-eliom.change"
 
 module Sociaweb_app = Eliom_registration.App
   (struct
@@ -45,10 +44,9 @@ let force_dsub ~operator (lb_id, ub_id) =
   let%lwt lb_name = Entity.display_name lb in
   let%lwt editor_id = Entity.soid operator in
   let%lwt editor_name = Entity.display_name operator in
-  Lwt_log.info_f ~section:change_section
-    "#%ld %S forces #%ld %S ⊆ #%ld %S"
-    editor_id editor_name lb_id lb_name ub_id ub_name
-    >>= fun () ->
+  Change_log.info (fun f ->
+    f "#%ld %S forces #%ld %S ⊆ #%ld %S"
+      editor_id editor_name lb_id lb_name ub_id ub_name) >>= fun () ->
   Entity.force_dsub lb ub
 
 let relax_dsub ~operator (lb_id, ub_id) =
@@ -58,10 +56,9 @@ let relax_dsub ~operator (lb_id, ub_id) =
   let%lwt lb_name = Entity.display_name lb in
   let%lwt editor_id = Entity.soid operator in
   let%lwt editor_name = Entity.display_name operator in
-  Lwt_log.info_f ~section:change_section
-    "#%ld %S relaxes #%ld %S ⊆ #%ld %S"
-    editor_id editor_name lb_id lb_name ub_id ub_name
-    >>= fun () ->
+  Change_log.info (fun f ->
+    f "#%ld %S relaxes #%ld %S ⊆ #%ld %S"
+      editor_id editor_name lb_id lb_name ub_id ub_name) >>= fun () ->
   Entity.relax_dsub lb ub
 
 let%client force_dsub = ~%(auth_sf [%json: int32 * int32] force_dsub)
