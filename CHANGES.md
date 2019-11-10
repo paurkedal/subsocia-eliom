@@ -1,5 +1,12 @@
 # Change Log
 
+## 0.18.1
+
+- Use `Logs` for inclusion change log, and it possible to configure a target
+  log file.
+- Print out both ID and display name for author and entities in inclusion
+  change log.
+
 ## 0.18.0
 
 The Eliom part of Subsocia has been put into a separate package.  For change
