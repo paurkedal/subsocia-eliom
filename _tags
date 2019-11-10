@@ -24,6 +24,7 @@ true: bin_annot, eliom_ppx
 
 <web/client/*>: \
     package(eliom.client), \
+    package(js_of_ocaml), \
     package(js_of_ocaml-ppx), \
     package(lwt), \
     package(lwt_log.core), \

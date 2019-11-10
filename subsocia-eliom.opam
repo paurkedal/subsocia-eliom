@@ -9,6 +9,7 @@ depends: [
   "adpkg" {build}
   "caqti"
   "caqti-lwt"
+  "config-file"
   "eliom" {>= "6.6" & < "7.0~"}
   "fmt"
   "js_of_ocaml" {>= "3.3"}
