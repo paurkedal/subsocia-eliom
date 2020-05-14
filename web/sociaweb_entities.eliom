@@ -133,11 +133,11 @@ open Subsocia_connection
       ]
     in
     let%lwt attr_trs = Lwt_list.map_s render_tr ats in
-    let%lwt ub_name = Entity.display_name ~langs:cri.cri_langs ub in
+    let%lwt ub_link = entity_link ~langs:cri.cri_langs ub in
     Lwt.return
       (if attr_trs = []
        then None
-       else Some (F.tr [F.td []; F.th [F.txt ub_name]] :: attr_trs))
+       else Some (F.tr [F.td []; F.th [ub_link]] :: attr_trs))
 
   let render_dsuper ~cri ~enable_edit focus =
     let is_relevant csuper =
