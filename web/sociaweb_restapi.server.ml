@@ -1,4 +1,4 @@
-(* Copyright (C) 2015--2018  Petter A. Urkedal <paurkedal@gmail.com>
+(* Copyright (C) 2015--2020  Petter A. Urkedal <paurkedal@gmail.com>
  *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -68,7 +68,8 @@ let restapi_service =
   let open Eliom_service in
   let get = Eliom_parameter.(
     string "subject" ** set string "must" ** set string "may" **
-    set string "q") in
+    set string "q")
+  in
   create ~path:(Path ["restapi"; "authorize"]) ~meth:(Get get) ()
 
 let _ =
@@ -86,7 +87,8 @@ let _ =
       let is_member_of group =
         match%lwt selected_entity group with
         | None -> Lwt.return false
-        | Some group -> Entity.is_sub user group in
+        | Some group -> Entity.is_sub user group
+      in
       let get_attribute an =
         if not (String_set.mem an allowed_ans) then Lwt.return_none else
         match%lwt Attribute_type.any_of_name_exn an with
@@ -95,13 +97,15 @@ let _ =
           let vt = Attribute_type.value_type at in
           let%lwt vs = Entity.get_values at root user in
           let vs = Values.elements vs in
-          Lwt.return (Some (an, List.map (Value.to_json vt) vs)) in
+          Lwt.return (Some (an, List.map (Value.to_json vt) vs))
+      in
       let%lwt must_ok = Lwt_list.for_all_p is_member_of must in
       if must_ok then
         let%lwt may_res = Lwt_list.filter_p is_member_of may in
         let%lwt query_res = Lwt_list.filter_map_p get_attribute query in
         Lwt.return (true, may_res, query_res)
       else
-        Lwt.return (false, [], []) in
+        Lwt.return (false, [], [])
+  in
   let resp = make_authorize_response must_ok may_ok query_res in
   Eliom_registration.String.send (resp)

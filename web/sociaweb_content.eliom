@@ -1,4 +1,4 @@
-(* Copyright (C) 2015--2019  Petter A. Urkedal <paurkedal@gmail.com>
+(* Copyright (C) 2015--2020  Petter A. Urkedal <paurkedal@gmail.com>
  *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -67,7 +67,8 @@
     let n = (l + m - 1) / m in
     let mktr i =
       let mktd j = if i + j * n < l then items.(i + j * n) else F.td [] in
-      F.tr (List.sample mktd m) in
+      F.tr (List.sample mktd m)
+    in
     match List.sample mktr n with
     | [] -> F.div ~a:[F.a_class ("multicol" :: "empty" :: cls)] []
     | trs -> F.table ~a:[F.a_class ("multicol" :: cls)] trs

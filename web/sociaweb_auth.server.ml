@@ -1,4 +1,4 @@
-(* Copyright (C) 2015--2018  Petter A. Urkedal <paurkedal@gmail.com>
+(* Copyright (C) 2015--2020  Petter A. Urkedal <paurkedal@gmail.com>
  *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -45,15 +45,18 @@ let get_authenticalia_opt () =
     let auth_method =
       match Sociaweb_config.hba_method_header#get with
       | None -> None
-      | Some hn -> Option.found (fun () -> Ocsigen_headers.find hn frame) in
+      | Some hn -> Option.found (fun () -> Ocsigen_headers.find hn frame)
+    in
     let auth_method =
       match auth_method with
       | None -> Sociaweb_config.hba_method#get
-      | Some _ as r -> r in
+      | Some _ as r -> r
+    in
     let auth_identity =
       match Sociaweb_config.hba_identity_header#get with
       | None -> None
-      | Some hn -> Option.found (fun () -> Ocsigen_headers.find hn frame) in
+      | Some hn -> Option.found (fun () -> Ocsigen_headers.find hn frame)
+    in
     match auth_method, auth_identity with
     | Some auth_method, Some auth_identity ->
       Lwt.return (Some {auth_method; auth_identity})

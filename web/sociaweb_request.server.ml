@@ -1,4 +1,4 @@
-(* Copyright (C) 2015--2016  Petter A. Urkedal <paurkedal@gmail.com>
+(* Copyright (C) 2015--2020  Petter A. Urkedal <paurkedal@gmail.com>
  *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -33,12 +33,14 @@ let http_redirect ~service get =
 
 let request_info_langs () =
   let compare_al (_, qA) (_, qB) =
-    compare (Option.get_or 1.0 qB) (Option.get_or 1.0 qA) in
+    compare (Option.get_or 1.0 qB) (Option.get_or 1.0 qA)
+  in
   let decode_al (s, _) =
     try Some (Lang.of_string s)
-    with Invalid_argument _ -> None in
+    with Invalid_argument _ -> None
+  in
   let als = List.sort compare_al (Eliom_request_info.get_accept_language ()) in
-  List.fmap decode_al als
+  List.filter_map decode_al als
 
 type custom_request_info = {
   cri_operator : Entity.t;
@@ -47,9 +49,11 @@ type custom_request_info = {
 
 let authenticate_cri () =
   let%lwt cri_operator = authenticate () in
-  let cri_langs = match request_info_langs () with
-                  | [] -> [Lang.of_string "en"]
-                  | langs -> langs in
+  let cri_langs =
+    (match request_info_langs () with
+     | [] -> [Lang.of_string "en"]
+     | langs -> langs)
+  in
   Lwt.return {cri_operator; cri_langs}
 
 (* Utility Functions *)
@@ -57,5 +61,6 @@ let authenticate_cri () =
 let auth_sf json f =
   let f' tup =
     let%lwt operator = authenticate () in
-    f ~operator tup in
+    f ~operator tup
+  in
   server_function json f'

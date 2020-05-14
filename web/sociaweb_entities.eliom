@@ -1,4 +1,4 @@
-(* Copyright (C) 2014--2019  Petter A. Urkedal <paurkedal@gmail.com>
+(* Copyright (C) 2014--2020  Petter A. Urkedal <paurkedal@gmail.com>
  *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -63,7 +63,8 @@ open Subsocia_connection
   let ordered_entities ~cri es =
     let amend_name e =
       let%lwt name = Entity.display_name ~langs:cri.cri_langs e in
-      Lwt.return (name, e) in
+      Lwt.return (name, e)
+    in
     let%lwt es = Lwt_list.map_s amend_name (Entity.Set.elements es) in
     let es = List.sort (fun (s0, _) (s1, _) -> compare s0 s1) es in
     Lwt.return (List.map snd es, suggested_number_of_columns es)
@@ -76,8 +77,10 @@ open Subsocia_connection
     let%lwt link = entity_link ~langs:cri.cri_langs csuper in
     if not can_edit then
       let button =
-        F.Raw.button ~a:[F.a_button_type `Button; F.a_disabled ();
-                         F.a_style "visibility: hidden"] [] in
+        F.button
+          ~a:[F.a_button_type `Button; F.a_disabled ();
+              F.a_style "visibility: hidden"] []
+      in
       Lwt.return (F.td [button; link])
     else
       let%lwt focus_id = Entity.soid focus in
@@ -91,10 +94,13 @@ open Subsocia_connection
         else
           let add = [%client fun _ ->
             Lwt.async (fun () -> force_dsub (~%focus_id, ~%dsuper_id))] in
-          ("+", add, Some [F.a_class ["candidate"]]) in
+          ("+", add, Some [F.a_class ["candidate"]])
+      in
       let button =
-        F.Raw.button ~a:[F.a_button_type `Button; F.a_onclick handler]
-                     [F.txt label] in
+        F.button
+          ~a:[F.a_button_type `Button; F.a_onclick handler]
+          [F.txt label]
+      in
       Lwt.return (F.td ?a [button; link])
 
   let rec fold_closure_from f dsucc x acc =
@@ -116,14 +122,16 @@ open Subsocia_connection
       let%lwt value_frag =
         let t1 = Attribute_type.value_type at in
         Entity.get_values at ub lb >|= fun vs ->
-        match List.map (Value.typed_to_string t1) (Values.elements vs) with
-        | [] -> [F.span ~a:[F.a_class ["none"]] [F.txt "-"]]
-        | strs -> [F.txt (String.concat ", " strs)] in
+        (match List.map (Value.typed_to_string t1) (Values.elements vs) with
+         | [] -> [F.span ~a:[F.a_class ["none"]] [F.txt "-"]]
+         | strs -> [F.txt (String.concat ", " strs)])
+      in
       Lwt.return @@ F.tr [
         F.td [F.txt an; F.sup [F.txt (Multiplicity.to_string mu)];
               F.txt ":"];
         F.td value_frag;
-      ] in
+      ]
+    in
     let%lwt attr_trs = Lwt_list.map_s render_tr ats in
     let%lwt ub_name = Entity.display_name ~langs:cri.cri_langs ub in
     Lwt.return
@@ -135,13 +143,14 @@ open Subsocia_connection
     let is_relevant csuper =
       let%lwt is_dsuper = Entity.is_dsub focus csuper in
       if is_dsuper then Lwt.return_true else
-      Entity.can_edit_entity cri.cri_operator csuper in
+      Entity.can_edit_entity cri.cri_operator csuper
+    in
     if enable_edit then
       let%lwt csupers = Entity.candidate_dsupers ~include_current:true focus in
       let%lwt csupers = Entity.Set.filter_s is_relevant csupers in
       let%lwt csupers, m = ordered_entities ~cri csupers in
-      let%lwt csuper_frags = Lwt_list.map_s (neighbour_with_edit ~cri focus)
-                                        csupers in
+      let%lwt csuper_frags =
+        Lwt_list.map_s (neighbour_with_edit ~cri focus) csupers in
       let csuper_block = multicol_tds ~m ~cls:["soc-dsuper1"] csuper_frags in
       Lwt.return @@
         F.table ~a:[F.a_class ["soc-layout"]]
@@ -164,10 +173,12 @@ open Subsocia_connection
     let%lwt ubs = upwards_closure ent in
     let attr_aux ub acc =
       render_attribution ~cri ent ub
-        >|= function None -> acc | Some trs -> trs :: acc in
+        >|= function None -> acc | Some trs -> trs :: acc
+    in
     let%lwt attr_trss = Entity.Set.fold_s attr_aux ubs [] in
-    let attr_table = F.table ~a:[F.a_class ["soc-assoc"]]
-                             (List.flatten attr_trss) in
+    let attr_table =
+      F.table ~a:[F.a_class ["soc-assoc"]] (List.flatten attr_trss)
+    in
     let%lwt dsuper_frag = render_dsuper ~cri ~enable_edit ent in
     Lwt.return @@ F.div ~a:[F.a_class ["soc-entity-browser"]] [
       dsuper_frag;
@@ -187,20 +198,25 @@ let default_entity_sel =
 let entity_handler entity_id_opt () =
   let%lwt cri = authenticate_cri () in
   let%lwt entity_id =
-    match entity_id_opt with
-    | Some id -> Lwt.return id
-    | None ->
-      let%lwt entity_id =
-        match%lwt Entity.select_opt default_entity_sel with
-        | None -> Lwt.return 1l
-        | Some entity -> Entity.soid entity in
-      http_redirect ~service:entities_service (Some entity_id) in
+    (match entity_id_opt with
+     | Some id -> Lwt.return id
+     | None ->
+        let%lwt entity_id =
+          (match%lwt Entity.select_opt default_entity_sel with
+           | None -> Lwt.return 1l
+           | Some entity -> Entity.soid entity)
+        in
+        http_redirect ~service:entities_service (Some entity_id))
+  in
   let%lwt e = entity_for_view ~operator:cri.cri_operator entity_id in
   let%lwt enable_edit =
-    match Sociaweb_config.member_types#get with
-    | [] -> Lwt.return_true
-    | ets -> Entity.entity_type e >>= Entity_type.name >|=
-             fun et -> List.mem et ets in
+    (match Sociaweb_config.member_types#get with
+     | [] -> Lwt.return_true
+     | ets ->
+        Entity.entity_type e
+          >>= Entity_type.name
+          >|= (fun et -> List.mem et ets))
+  in
   let%lwt browser_div = render_browser ~enable_edit ~cri e in
   let entity_changed_c = Eliom_react.Down.of_react (entity_changed entity_id) in
   ignore_cv [%client
