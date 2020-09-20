@@ -30,6 +30,16 @@ let local_rules () =
   sed_rule ~dep:"ocsigen-dev.conf.in" ~prod:"ocsigen-dev.conf"
     ["s;@PANOGRAPH_DATADIR@;" ^ pkg_datadir "panograph" ^ ";g"]
 
+let js_of_ocaml_version =
+  let ic = Unix.open_process_in "js_of_ocaml --version" in
+  let version = input_line ic in
+  (match Unix.close_process_in ic with
+   | Unix.WEXITED 0 -> ()
+   | _ -> failwith "js_of_ocaml --version failed");
+  (match String.split_on_char '.' (String.trim version) with
+   | [] | [_] -> failwith "Failed to parse js_of_ocaml version."
+   | v0 :: v1 :: _ -> (int_of_string v0, int_of_string v1))
+
 let () = Ocamlbuild_plugin.dispatch @@ fun hook ->
   M.dispatcher ~oasis_executables hook;
   (match hook with
@@ -37,6 +47,8 @@ let () = Ocamlbuild_plugin.dispatch @@ fun hook ->
    | After_rules ->
       local_rules ();
       flag ["ocaml"; "compile"] (S[A"-w"; A"+A-4-42-44-48"]);
+      if js_of_ocaml_version >= (3, 6) then
+        flag ["js_of_ocaml"] & S[A"+js_of_ocaml-compiler/runtime.js"];
       (match Sys.getenv "TERM" with
        | exception Not_found -> ()
        | "" | "dumb" -> ()
