@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.18.2
+
+  - Support js\_of\_ocaml 3.7.
+  - Style adjustments.
+
 ## 0.18.1
 
 - Use `Logs` for inclusion change log, and it possible to configure a target
