@@ -15,8 +15,8 @@
  * <http://www.gnu.org/licenses/> and <https://spdx.org>, respectively.
  *)
 
+open Iso639
 open Eliom_client
-open Panograph_i18n
 open Sociaweb_auth
 open Subsocia_connection
 open Unprime_list
@@ -36,23 +36,20 @@ let request_info_langs () =
   let compare_al (_, qA) (_, qB) =
     compare (Option.get_or 1.0 qB) (Option.get_or 1.0 qA)
   in
-  let decode_al (s, _) =
-    try Some (Lang.of_string s)
-    with Invalid_argument _ -> None
-  in
+  let decode_al (s, _) = Lang.of_string s in
   let als = List.sort compare_al (Eliom_request_info.get_accept_language ()) in
   List.filter_map decode_al als
 
 type custom_request_info = {
   cri_operator : Entity.t;
-  cri_langs : lang list;
+  cri_langs : Lang.t list;
 }
 
 let authenticate_cri () =
   let%lwt cri_operator = authenticate () in
   let cri_langs =
     (match request_info_langs () with
-     | [] -> [Lang.of_string "en"]
+     | [] -> [Lang.of_string_exn "en"]
      | langs -> langs)
   in
   Lwt.return {cri_operator; cri_langs}

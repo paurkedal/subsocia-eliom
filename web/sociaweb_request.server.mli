@@ -16,7 +16,7 @@
  *)
 
 open Eliom_client
-open Panograph_i18n
+open Iso639
 open Subsocia_connection
 
 val http_error : int -> string -> 'a Lwt.t
@@ -27,7 +27,7 @@ val http_redirect :
 
 type custom_request_info = {
   cri_operator : Entity.t;
-  cri_langs : lang list;
+  cri_langs : Lang.t list;
 }
 
 val authenticate_cri : unit -> custom_request_info Lwt.t
