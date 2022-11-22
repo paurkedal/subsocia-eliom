@@ -9,6 +9,7 @@ package "server" (
     caqti
     caqti-lwt
     config-file
+    confero
     eliom.server
     fmt
     js_of_ocaml.deriving

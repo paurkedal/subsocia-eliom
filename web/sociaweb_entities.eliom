@@ -33,6 +33,8 @@ open Subsocia_connection
 
 [%%server
 
+  let collate x y = Confero.collate ~total:true x y
+
   module Int32_hashable = struct
     type t = int32
     let equal = (=)
@@ -67,7 +69,7 @@ open Subsocia_connection
       Lwt.return (name, e)
     in
     let%lwt es = Lwt_list.map_s amend_name (Entity.Set.elements es) in
-    let es = List.sort (fun (s0, _) (s1, _) -> compare s0 s1) es in
+    let es = List.sort (fun (s0, _) (s1, _) -> collate s0 s1) es in
     Lwt.return (List.map snd es, suggested_number_of_columns es)
 
   let neighbour_link ~cri ent =

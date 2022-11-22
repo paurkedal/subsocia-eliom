@@ -9,6 +9,7 @@ depends: [
   "adpkg" {build}
   "caqti"
   "caqti-lwt"
+  "confero"
   "config-file"
   "eliom" {>= "6.6" & < "7.0~"}
   "fmt"

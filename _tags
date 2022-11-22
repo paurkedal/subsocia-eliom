@@ -4,6 +4,7 @@ true: bin_annot, eliom_ppx
     package(caqti), \
     package(caqti-lwt), \
     package(config-file), \
+    package(confero), \
     package(eliom.server), \
     package(fmt), \
     package(js_of_ocaml-ppx_deriving_json), \
