@@ -1,4 +1,4 @@
-(* Copyright (C) 2015--2022  Petter A. Urkedal <paurkedal@gmail.com>
+(* Copyright (C) 2015--2023  Petter A. Urkedal <paurkedal@gmail.com>
  *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -36,7 +36,7 @@ let request_info_langs () =
   let compare_al (_, qA) (_, qB) =
     compare (Option.get_or 1.0 qB) (Option.get_or 1.0 qA)
   in
-  let decode_al (s, _) = Lang.of_string s in
+  let decode_al (s, _) = Lang.of_iso639p1 s in
   let als = List.sort compare_al (Eliom_request_info.get_accept_language ()) in
   List.filter_map decode_al als
 
@@ -49,7 +49,7 @@ let authenticate_cri () =
   let%lwt cri_operator = authenticate () in
   let cri_langs =
     (match request_info_langs () with
-     | [] -> [Lang.of_string_exn "en"]
+     | [] -> [Lang.of_string_exn "eng"]
      | langs -> langs)
   in
   Lwt.return {cri_operator; cri_langs}
