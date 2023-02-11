@@ -1,4 +1,4 @@
-(* Copyright (C) 2014--2022  Petter A. Urkedal <paurkedal@gmail.com>
+(* Copyright (C) 2014--2023  Petter A. Urkedal <paurkedal@gmail.com>
  *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -112,7 +112,8 @@ open Subsocia_connection
     Lwt.return (f x acc)
 
   let upwards_closure e =
-    fold_closure_from Entity.Set.add Entity.dsuper e Entity.Set.empty
+    fold_closure_from
+      Entity.Set.add (Entity.preimage1 Relation.True) e Entity.Set.empty
 
   let render_attribution ~cri lb ub =
     let%lwt lbt = Entity.entity_type lb in
