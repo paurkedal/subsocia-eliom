@@ -1,4 +1,4 @@
-(* Copyright (C) 2015--2022  Petter A. Urkedal <paurkedal@gmail.com>
+(* Copyright (C) 2015--2023  Petter A. Urkedal <paurkedal@gmail.com>
  *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -17,6 +17,7 @@
 
 open Eliom_content.Html
 open Lwt.Infix
+open Lwt.Syntax
 open Sociaweb_auth
 open Sociaweb_request
 open Sociaweb_services
@@ -58,33 +59,33 @@ let () =
 let () =
   Eliom_registration.Html.register ~service:registration_post_service
     @@ fun () (first_name, (last_name, email)) ->
-  begin match%lwt get_operator_opt () with
-  | None -> Lwt.return_unit
-  | Some _ -> http_error 400 "Already registered."
-  end >>= fun () ->
-  let%lwt auth = get_authenticalia () in
-  let%lwt at_first_name = Const.at_first_name in
-  let%lwt at_last_name = Const.at_last_name in
-  let%lwt at_email = Const.at_email in
-  let%lwt e_root = Entity.get_root () in
-  let%lwt et_person = Const.et_person in
-  let%lwt e_new_user = Entity.create et_person in
-  let%lwt e_new_user_id = Entity.soid e_new_user in
-  let%lwt e_new_users = Const.e_new_users in
-  Entity.force_dsub e_new_user e_new_users >>= fun () ->
-  Entity.set_value at_first_name first_name e_root e_new_user >>= fun () ->
-  Entity.set_value at_last_name  last_name  e_root e_new_user >>= fun () ->
-  Entity.set_value at_email      email      e_root e_new_user >>= fun () ->
-  set_authenticalia e_new_user auth >>= fun () ->
-  Lwt.return @@
-    Eliom_tools.F.html
-      ~title:"Welcome"
-      ~css:[["css"; "subsocia.css"]]
-      (F.body [
-        F.h1 [F.txt "Welcome, "; F.txt first_name];
-        F.p [
-          F.a ~service:entities_service
-            [F.txt "Your registration is complete."]
-            (Some e_new_user_id);
-        ];
-      ])
+  let* () =
+    (get_operator_opt () >>= function
+     | None -> Lwt.return_unit
+     | Some _ -> http_error 400 "Already registered.")
+  in
+  let* auth = get_authenticalia () in
+  let* at_first_name = Const.at_first_name in
+  let* at_last_name = Const.at_last_name in
+  let* at_email = Const.at_email in
+  let* e_root = Entity.get_root () in
+  let* et_person = Const.et_person in
+  let* e_new_user = Entity.create et_person in
+  let* e_new_user_id = Entity.soid e_new_user in
+  let* e_new_users = Const.e_new_users in
+  let* () = Entity.force_dsub e_new_user e_new_users in
+  let* () = Entity.set_value at_first_name first_name e_root e_new_user in
+  let* () = Entity.set_value at_last_name  last_name  e_root e_new_user in
+  let* () = Entity.set_value at_email      email      e_root e_new_user in
+  let+ () = set_authenticalia e_new_user auth in
+  Eliom_tools.F.html
+    ~title:"Welcome"
+    ~css:[["css"; "subsocia.css"]]
+    (F.body [
+      F.h1 [F.txt "Welcome, "; F.txt first_name];
+      F.p [
+        F.a ~service:entities_service
+          [F.txt "Your registration is complete."]
+          (Some e_new_user_id);
+      ];
+    ])

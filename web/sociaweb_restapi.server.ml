@@ -1,4 +1,4 @@
-(* Copyright (C) 2015--2022  Petter A. Urkedal <paurkedal@gmail.com>
+(* Copyright (C) 2015--2023  Petter A. Urkedal <paurkedal@gmail.com>
  *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -16,6 +16,7 @@
  *)
 
 open Lwt.Infix
+open Lwt.Syntax
 open Sociaweb_request
 open Subsocia_common
 open Subsocia_connection
@@ -62,8 +63,11 @@ let make_authorize_response must_ok may_ok query_res =
   Buffer.contents buf, "application/json"
 
 let selected_entity s =
-  try%lwt Entity.select_opt (selector_of_string s)
-  with Failure msg | Invalid_argument msg -> http_error 400 msg
+  Lwt.catch
+    (fun () -> Entity.select_opt (selector_of_string s))
+    (function
+     | Failure msg | Invalid_argument msg -> http_error 400 msg
+     | exn -> raise exn)
 
 let restapi_service =
   let open Eliom_service in
@@ -79,34 +83,37 @@ let _ =
   Lwt_log.debug_f
     "Checking %s against [%s] and optional [%s] groups"
     subject (String.concat ", " must) (String.concat ", " may) >>= fun () ->
-  let%lwt root = Entity.get_root () in
+  let* root = Entity.get_root () in
   let allowed_ans = Lazy.force allowed_attributes in
-  let%lwt must_ok, may_ok, query_res =
-    match%lwt selected_entity subject with
-    | None -> Lwt.return (false, [], [])
-    | Some user ->
-      let is_member_of group =
-        match%lwt selected_entity group with
-        | None -> Lwt.return false
-        | Some group -> Entity.is_sub user group
-      in
-      let get_attribute an =
-        if not (String_set.mem an allowed_ans) then Lwt.return_none else
-        match%lwt Attribute_type.any_of_name_exn an with
-        | exception Caqti_error.Exn _ -> Lwt.return_none
-        | Attribute_type.Any at ->
-          let vt = Attribute_type.value_type at in
-          let%lwt vs = Entity.get_values at root user in
-          let vs = Values.elements vs in
-          Lwt.return (Some (an, List.map (Value.to_json vt) vs))
-      in
-      let%lwt must_ok = Lwt_list.for_all_p is_member_of must in
-      if must_ok then
-        let%lwt may_res = Lwt_list.filter_p is_member_of may in
-        let%lwt query_res = Lwt_list.filter_map_p get_attribute query in
-        Lwt.return (true, may_res, query_res)
-      else
-        Lwt.return (false, [], [])
+  let* must_ok, may_ok, query_res =
+    (selected_entity subject >>= function
+     | None -> Lwt.return (false, [], [])
+     | Some user ->
+        let is_member_of group =
+          (selected_entity group >>= function
+           | None -> Lwt.return false
+           | Some group -> Entity.is_sub user group)
+        in
+        let get_attribute an =
+          if not (String_set.mem an allowed_ans) then Lwt.return_none else
+          Lwt.catch
+            (fun () ->
+              let* Attribute_type.Any at = Attribute_type.any_of_name_exn an in
+              let vt = Attribute_type.value_type at in
+              let+ vs = Entity.get_values at root user in
+              let vs = Values.elements vs in
+              Some (an, List.map (Value.to_json vt) vs))
+            (function
+             | Caqti_error.Exn _ -> Lwt.return_none
+             | exn -> raise exn)
+        in
+        let* must_ok = Lwt_list.for_all_p is_member_of must in
+        if must_ok then
+          let* may_res = Lwt_list.filter_p is_member_of may in
+          let+ query_res = Lwt_list.filter_map_p get_attribute query in
+          (true, may_res, query_res)
+        else
+          Lwt.return (false, [], []))
   in
   let resp = make_authorize_response must_ok may_ok query_res in
   Eliom_registration.String.send (resp)

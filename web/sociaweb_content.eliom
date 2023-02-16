@@ -1,4 +1,4 @@
-(* Copyright (C) 2015--2022  Petter A. Urkedal <paurkedal@gmail.com>
+(* Copyright (C) 2015--2023  Petter A. Urkedal <paurkedal@gmail.com>
  *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -21,6 +21,7 @@
 ]
 [%%server
   open Lwt.Infix
+  open Lwt.Syntax
   open Eliom_client
   open Sociaweb_auth
   open Sociaweb_services
@@ -55,9 +56,9 @@
 *)
 
   let entity_link ~langs ent =
-    let%lwt id = Entity.soid ent in
-    let%lwt name = Entity.display_name ~langs ent in
-    Lwt.return (F.a ~service:entities_service [F.txt name] (Some id))
+    let* id = Entity.soid ent in
+    let+ name = Entity.display_name ~langs ent in
+    F.a ~service:entities_service [F.txt name] (Some id)
 ]
 
 [%%shared
@@ -79,25 +80,25 @@
 ]
 
 let complete_helper entity_type_id super_id words_str =
-  let%lwt operator = authenticate () in
-  let%lwt super = Pwt_option.map_s Entity.of_soid super_id in
-  let%lwt can_search =
+  let* operator = authenticate () in
+  let* super = Pwt_option.map_s Entity.of_soid super_id in
+  let* can_search =
     (match super with
      | None ->
-        let%lwt root = Entity.get_root () in
+        let* root = Entity.get_root () in
         Entity.can_search_below operator root
      | Some super ->
         Entity.can_search_below operator super)
   in
   if not can_search then
     Lwt.return (Panui_result.error "Search not permitted.") else
-  let%lwt entity_type = Pwt_option.map_s Entity_type.of_soid entity_type_id in
+  let* entity_type = Pwt_option.map_s Entity_type.of_soid entity_type_id in
   (match Subsocia_fts.of_completion_string words_str with
    | None -> Lwt_result.return []
    | Some fts ->
       let cutoff = Sociaweb_config.completion_cutoff#get in
       let limit = Sociaweb_config.completion_limit#get in
-      let%lwt root = Entity.get_root () in
+      let* root = Entity.get_root () in
       Lwt_result.ok
         @@ Entity.image1_fts ?entity_type ?super ~cutoff ~limit fts root)
 
@@ -106,9 +107,9 @@ let complete (entity_type_id, super_id, words_str) =
     (complete_helper entity_type_id super_id words_str)
     (Lwt_list.map_s
       (fun (e, _) ->
-        let%lwt name = Entity.display_name e in
-        let%lwt id = Entity.soid e in
-        Lwt.return (name, id)))
+        let* name = Entity.display_name e in
+        let+ id = Entity.soid e in
+        (name, id)))
 
 let%client complete
   : int32 option * int32 option * string ->
@@ -116,24 +117,26 @@ let%client complete
   ~%(server_function [%json: int32 option * int32 option * string] complete)
 
 let completed (entity_type_id, super_id, str) =
-  match%lwt
+  let* res =
     Lwt_result.bind_lwt
       (complete_helper entity_type_id super_id str)
       (Lwt_list.filter_s (fun (e, _) -> Entity.display_name e >|= (=) str))
-  with
-  | Ok [(entity, _)] -> Entity.soid entity >|= Option.some
-  | _ -> Lwt.return None
+  in
+  (match res with
+   | Ok [(entity, _)] -> Entity.soid entity >|= Option.some
+   | _ -> Lwt.return None)
 
 let%client completed
     : int32 option * int32 option * string -> int32 option Lwt.t =
   ~%(server_function [%json: int32 option * int32 option * string] completed)
 
 let entity_completion_input ?entity_type ?super emit =
-  let%lwt entity_type_id = Pwt_option.map_s Entity.soid entity_type in
-  let%lwt super_id = Pwt_option.map_s Entity.soid super in
-  let complete = [%client fun s ->
-    complete (~%entity_type_id, ~%super_id, s)] in
-  Lwt.return (Panui_complete.labelled_int32_option ~complete ~emit None)
+  let* entity_type_id = Pwt_option.map_s Entity.soid entity_type in
+  let+ super_id = Pwt_option.map_s Entity.soid super in
+  let complete =
+    [%client fun s -> complete (~%entity_type_id, ~%super_id, s)]
+  in
+  Panui_complete.labelled_int32_option ~complete ~emit None
 
 let%client entity_completion_input ?(entity_type_id : int32 option)
                                    ?(super_id : int32 option) emit =

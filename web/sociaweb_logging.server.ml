@@ -1,4 +1,4 @@
-(* Copyright (C) 2019--2022  Petter A. Urkedal <paurkedal@gmail.com>
+(* Copyright (C) 2019--2023  Petter A. Urkedal <paurkedal@gmail.com>
  *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -16,6 +16,7 @@
  *)
 
 open Lwt.Infix
+open Lwt.Syntax
 
 let buf_fmt () =
   let buf = Buffer.create 512 in
@@ -37,7 +38,7 @@ let channel_reporter oc_thread =
   let report src level ~over k msgf =
     let k () =
       let write () =
-        let%lwt oc = oc_thread in
+        let* oc = oc_thread in
         (match level with
          | Logs.App -> Lwt_io.write oc (app_flush ())
          | _ ->        Lwt_io.write oc (dst_flush ())) >>= fun () ->

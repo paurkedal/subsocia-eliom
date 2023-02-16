@@ -16,6 +16,7 @@
  *)
 
 open Iso639
+open Lwt.Syntax
 open Eliom_client
 open Sociaweb_auth
 open Subsocia_connection
@@ -46,19 +47,19 @@ type custom_request_info = {
 }
 
 let authenticate_cri () =
-  let%lwt cri_operator = authenticate () in
+  let+ cri_operator = authenticate () in
   let cri_langs =
     (match request_info_langs () with
      | [] -> [Lang.of_string_exn "eng"]
      | langs -> langs)
   in
-  Lwt.return {cri_operator; cri_langs}
+  {cri_operator; cri_langs}
 
 (* Utility Functions *)
 
 let auth_sf json f =
   let f' tup =
-    let%lwt operator = authenticate () in
+    let* operator = authenticate () in
     f ~operator tup
   in
   server_function json f'

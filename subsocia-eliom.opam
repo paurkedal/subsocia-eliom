@@ -18,7 +18,6 @@ depends: [
   "js_of_ocaml-ppx_deriving_json"
   "lwt"
   "lwt_log"
-  "lwt_ppx"
   "logs"
   "ocaml"
   "ocamlbuild" {build}
