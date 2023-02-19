@@ -46,7 +46,7 @@ let () = Ocamlbuild_plugin.dispatch @@ fun hook ->
    | Before_options -> Options.make_links := false
    | After_rules ->
       local_rules ();
-      flag ["ocaml"; "compile"] (S[A"-w"; A"+A-4-42-44-48"]);
+      flag ["ocaml"; "compile"] (S[A"-w"; A"+A-4-40-42-44-48"]);
       if js_of_ocaml_version >= (3, 6) then
         flag ["js_of_ocaml"] & S[A"+js_of_ocaml-compiler/runtime.js"];
       (match Sys.getenv "TERM" with

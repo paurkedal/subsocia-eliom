@@ -1,4 +1,4 @@
-(* Copyright (C) 2016--2022  Petter A. Urkedal <paurkedal@gmail.com>
+(* Copyright (C) 2016--2023  Petter A. Urkedal <paurkedal@gmail.com>
  *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -30,3 +30,6 @@ val relax_dsub : operator: Entity.t -> int32 * int32 -> unit Lwt.t
 
 val force_dsub : int32 * int32 -> unit Lwt.t
 val relax_dsub : int32 * int32 -> unit Lwt.t
+(*
+val candidate_dsupers : int32 -> (string * int32) list Lwt.t
+*)

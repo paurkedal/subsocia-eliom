@@ -63,5 +63,27 @@ let relax_dsub ~operator (lb_id, ub_id) =
       editor_id editor_name lb_id lb_name ub_id ub_name) >>= fun () ->
   Entity.relax_dsub lb ub
 
+(*
+let candidate_dsupers ~operator focus_id =
+  let extract entity =
+    let* name = Entity.display_name entity in
+    let+ id = Entity.soid entity in
+    (name, id)
+  in
+  let compare (name1, id1) (name2, id2) =
+    let c = Confero.collate ~total:true name1 name2 in
+    if c <> 0 then c else Int32.compare id1 id2
+  in
+  entity_for_view ~operator focus_id
+    >>= Entity.candidate_dsupers
+    >>= Entity.Set.filter_s (Entity.can_edit_entity operator)
+    >|= Entity.Set.elements
+    >>= Lwt_list.map_p extract
+    >|= List.sort compare
+*)
+
 let%client force_dsub = ~%(auth_sf [%json: int32 * int32] force_dsub)
 let%client relax_dsub = ~%(auth_sf [%json: int32 * int32] relax_dsub)
+(*
+let%client candidate_dsupers = ~%(auth_sf [%json: int32] candidate_dsupers)
+*)
