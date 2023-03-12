@@ -59,12 +59,13 @@ let () =
 let () =
   Eliom_registration.Html.register ~service:registration_post_service
     @@ fun () (first_name, (last_name, email)) ->
-  let* () =
-    (get_operator_opt () >>= function
-     | None -> Lwt.return_unit
-     | Some _ -> http_error 400 "Already registered.")
+  let* im =
+    (get_authenticator_result () >>= function
+     | Unregistered identity_material -> Lwt.return identity_material
+     | Authenticated _ -> http_error 400 "Already registered."
+     | Unauthenticated -> http_error 401 "Not authenticated."
+     | Terminate msg -> http_error 500 msg)
   in
-  let* auth = get_authenticalia () in
   let* at_first_name = Const.at_first_name in
   let* at_last_name = Const.at_last_name in
   let* at_email = Const.at_email in
@@ -77,7 +78,7 @@ let () =
   let* () = Entity.set_value at_first_name first_name e_root e_new_user in
   let* () = Entity.set_value at_last_name  last_name  e_root e_new_user in
   let* () = Entity.set_value at_email      email      e_root e_new_user in
-  let+ () = set_authenticalia e_new_user auth in
+  let+ () = Entity.set_value im.attribute im.value im.prefix e_new_user in
   Eliom_tools.F.html
     ~title:"Welcome"
     ~css:[["css"; "subsocia.css"]]

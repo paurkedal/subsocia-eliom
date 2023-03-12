@@ -96,8 +96,8 @@ let complete_helper entity_type_id super_id words_str =
   (match Subsocia_fts.of_completion_string words_str with
    | None -> Lwt_result.return []
    | Some fts ->
-      let cutoff = Sociaweb_config.completion_cutoff#get in
-      let limit = Sociaweb_config.completion_limit#get in
+      let cutoff = Sociaweb_config.(global.completion_cutoff) in
+      let limit = Sociaweb_config.(global.completion_limit) in
       let* root = Entity.get_root () in
       Lwt_result.ok
         @@ Entity.image1_fts ?entity_type ?super ~cutoff ~limit fts root)

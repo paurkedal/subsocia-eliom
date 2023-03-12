@@ -25,7 +25,7 @@ open Printf
 open Unprime_list
 
 let allowed_attributes = lazy
-  (List.fold String_set.add Sociaweb_config.restapi_allowed_attributes#get
+  (List.fold String_set.add Sociaweb_config.(global.restapi_allowed_attributes)
              String_set.empty)
 
 let bprint_json_value buf = function

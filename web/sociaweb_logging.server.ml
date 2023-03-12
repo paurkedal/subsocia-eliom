@@ -60,7 +60,7 @@ module Change_log = (val Logs_lwt.src_log change_src)
 
 let () =
   Logs.Src.set_level change_src (Some Logs.Info);
-  (match Sociaweb_config.change_log#get with
+  (match Sociaweb_config.(global.change_log) with
    | None -> ()
    | Some fp' ->
       let fp =
