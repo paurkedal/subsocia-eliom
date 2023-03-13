@@ -44,6 +44,10 @@ type ('p, 'a) authentication_method =
       header: string;
       identity: ('p, 'a) path_template;
     }
+  | Trusted_environment of {
+      variable: string;
+      identity: ('p, 'a) path_template;
+    }
   | Bearer_jwt of {
       jwk: Jose.Jwk.public Jose.Jwk.t;
       identity: ('p, 'a) path_template;
@@ -129,6 +133,12 @@ let trusted_header_decoder =
   let+ identity = field "identity" path_template_decoder in
   Trusted_header {header; identity}
 
+let trusted_environment_decoder =
+  let open Decode in
+  let* variable = field "variable" string in
+  let+ identity = field "identity" path_template_decoder in
+  Trusted_environment {variable; identity}
+
 let fixed_decoder =
   let open Decode in
   let+ identity = field "identity" path_decoder in
@@ -156,6 +166,7 @@ let authentication_rule_decoder =
   let+ authentication =
     (match method_ with
      | "trusted-header" -> trusted_header_decoder
+     | "trusted-environment" -> trusted_environment_decoder
      | "fixed" -> fixed_decoder
      | "bearer-jwt" -> bearer_jwt_decoder
      | _ -> fail "Invalid authentication method.")

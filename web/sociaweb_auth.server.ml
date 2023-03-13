@@ -64,6 +64,9 @@ let authentication_rules =
    | Trusted_header {header; identity} ->
       let+ identity = resolve_path_templ identity in
       Trusted_header {header; identity}
+   | Trusted_environment {variable; identity} ->
+      let+ identity = resolve_path_templ identity in
+      Trusted_environment {variable; identity}
    | Bearer_jwt {jwk; identity} ->
       let+ identity = resolve_path_templ identity in
       Bearer_jwt {jwk; identity}
@@ -170,6 +173,13 @@ let denote_authentication_method ~request_info =
       (match Ocsigen_headers.find header frame with
        | value ->
           Log.debug (fun f -> f "Authenticating %s from trusted header." value)
+            >>= fun () ->
+          denote_path_template identity value
+       | exception Not_found -> Lwt.return Unauthenticated)
+   | Trusted_environment {variable; identity} ->
+      (match Unix.getenv variable with
+       | value ->
+          Log.debug (fun f -> f "Authenticated %s from $%s." value variable)
             >>= fun () ->
           denote_path_template identity value
        | exception Not_found -> Lwt.return Unauthenticated)
