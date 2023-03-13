@@ -12,6 +12,7 @@ package "server" (
     decoders-yojson
     eliom.server
     fmt
+    jose
     js_of_ocaml.deriving
     logs
     logs.lwt

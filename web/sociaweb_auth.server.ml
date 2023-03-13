@@ -64,6 +64,9 @@ let authentication_rules =
    | Trusted_header {header; identity} ->
       let+ identity = resolve_path_templ identity in
       Trusted_header {header; identity}
+   | Bearer_jwt {jwk; identity} ->
+      let+ identity = resolve_path_templ identity in
+      Bearer_jwt {jwk; identity}
   in
   let resolve_rule (cond, meth) =
     let+ meth = resolve_meth meth in
@@ -127,6 +130,38 @@ let rec denote_condition ~request_info =
       in
       Ipaddr.Prefix.mem address prefix
 
+let auth_jwt jwk identity data =
+  (match String.split_on_char ' ' data |> List.filter ((<>) "") with
+   | ["Bearer"; token] ->
+      let now = Ptime_clock.now () in
+      (match Jose.Jwt.of_string ~jwk ~now token with
+       | Ok jwt ->
+          Log.debug (fun f -> f "Authenticated by JWT.") >>= fun () ->
+          (match Jose.Jwt.get_string_claim jwt "sub" with
+           | Some sub -> denote_path_template identity sub
+           | None ->
+              Log.info (fun f -> f "Missing sub claim in JWT.")
+              >|= fun () -> Unauthenticated)
+       | Error `Expired ->
+          Log.info (fun f -> f "The bearer token has expired.")
+          >|= fun () -> Unauthenticated
+       | Error `Invalid_signature ->
+          Log.info (fun f ->
+            f "The signature of the bearer token is invalid.")
+          >|= fun () -> Unauthenticated
+       | Error (`Msg msg) ->
+          Log.info (fun f -> f "Bad bearer token: %s" msg)
+          >|= fun () -> Unauthenticated
+       | Error `Not_json ->
+          Log.info (fun f -> f "Bearer token data is not JSON.")
+          >|= fun () -> Unauthenticated
+       | Error `Not_supported ->
+          Log.info (fun f -> f "Bearer token format unsupported.")
+          >|= fun () -> Unauthenticated)
+   | _ ->
+      Log.info (fun f -> f "Authorization header is no a bearer token.")
+      >|= fun () -> Unauthenticated)
+
 let denote_authentication_method ~request_info =
   let open Sociaweb_config in
   function
@@ -141,6 +176,11 @@ let denote_authentication_method ~request_info =
    | Fixed {identity} ->
       Log.debug (fun f -> f "Authenticating fixed user.") >>= fun () ->
       Lwt.return (Authenticated identity)
+   | Bearer_jwt {jwk; identity} ->
+      let frame = Ocsigen_request_info.http_frame request_info in
+      (match Ocsigen_headers.find "Authorization" frame with
+       | exception Not_found -> Lwt.return Unauthenticated
+       | data -> auth_jwt jwk identity data)
 
 let denote_authentication_rule ~request_info (cond, meth) =
   if denote_condition ~request_info cond then

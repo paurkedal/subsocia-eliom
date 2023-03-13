@@ -19,6 +19,7 @@
     <extension findlib-package="confero.ducet"/>
     <extension findlib-package="eliom.server"/>
     <extension findlib-package="fmt"/>
+    <extension findlib-package="jose"/>
     <extension findlib-package="js_of_ocaml.deriving"/>
     <extension findlib-package="lwt"/>
     <extension findlib-package="lwt_log.core"/>

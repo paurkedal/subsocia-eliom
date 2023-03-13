@@ -42,6 +42,10 @@ type ('p, 'a) authentication_method =
       header: string;
       identity: ('p, 'a) path_template;
     }
+  | Bearer_jwt of {
+      jwk: Jose.Jwk.public Jose.Jwk.t;
+      identity: ('p, 'a) path_template;
+    }
 
 type t = {
   restapi_allowed_attributes: string list;

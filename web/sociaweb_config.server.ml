@@ -44,6 +44,10 @@ type ('p, 'a) authentication_method =
       header: string;
       identity: ('p, 'a) path_template;
     }
+  | Bearer_jwt of {
+      jwk: Jose.Jwk.public Jose.Jwk.t;
+      identity: ('p, 'a) path_template;
+    }
 
 type t = {
   restapi_allowed_attributes: string list;
@@ -130,6 +134,21 @@ let fixed_decoder =
   let+ identity = field "identity" path_decoder in
   Fixed {identity}
 
+let jwk_decoder json =
+  let conv_error = function
+   | `Json_parse_failed msg -> Decoders.Error.make ("JSON parse error: " ^ msg)
+   | `Msg msg -> Decoders.Error.make ("JWK parse error: " ^ msg)
+   | `Unsupported_kty -> Decoders.Error.make "Unsupported JWK key type."
+  in
+  Jose.Jwk.of_pub_json (json : Yojson.Basic.t :> Yojson.Safe.t)
+    |> Result.map_error conv_error
+
+let bearer_jwt_decoder =
+  let open Decode in
+  let* jwk = field "jwk" jwk_decoder in
+  let+ identity = field "identity" path_template_decoder in
+  Bearer_jwt {jwk; identity}
+
 let authentication_rule_decoder =
   let open Decode in
   let* method_ = field "method" string in
@@ -138,6 +157,7 @@ let authentication_rule_decoder =
     (match method_ with
      | "trusted-header" -> trusted_header_decoder
      | "fixed" -> fixed_decoder
+     | "bearer-jwt" -> bearer_jwt_decoder
      | _ -> fail "Invalid authentication method.")
   in
   (condition, authentication)
