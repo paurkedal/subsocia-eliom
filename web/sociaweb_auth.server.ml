@@ -25,8 +25,8 @@ module Log = (val Logs_lwt.src_log (Logs.Src.create "sociaweb.auth"))
 type request_info = Ocsigen_extensions.Ocsigen_request_info.request_info
 
 type identity_material = {
-  prefix: Entity.t;
-  attribute: string Attribute_type.t;
+  source: Entity.t;
+  attribute_type: string Attribute_type.t;
   value: string;
 }
 
@@ -52,24 +52,26 @@ let http_error code msg =
 
 let authentication_rules =
   let open Sociaweb_config in
-  let resolve_path_templ {prefix; attribute; value_pattern; value_template} =
-    let* prefix = Entity.select_one prefix in
-    let+ attribute = Attribute_type.of_name_exn Type.String attribute in
-    {prefix; attribute; value_pattern; value_template}
+  let resolve_identity_map
+        {source; attribute_type; value_pattern; value_template} =
+    let* source = Entity.select_one source in
+    let+ attribute_type =
+      Attribute_type.of_name_exn Type.String attribute_type in
+    {source; attribute_type; value_pattern; value_template}
   in
   let resolve_meth = function
    | Fixed {identity} ->
       let+ identity = Entity.select_one identity in
       Fixed {identity}
-   | Trusted_header {header; identity} ->
-      let+ identity = resolve_path_templ identity in
-      Trusted_header {header; identity}
-   | Trusted_environment {variable; identity} ->
-      let+ identity = resolve_path_templ identity in
-      Trusted_environment {variable; identity}
-   | Bearer_jwt {jwk; identity} ->
-      let+ identity = resolve_path_templ identity in
-      Bearer_jwt {jwk; identity}
+   | Trusted_header {header; identity_map} ->
+      let+ identity_map = resolve_identity_map identity_map in
+      Trusted_header {header; identity_map}
+   | Trusted_environment {variable; identity_map} ->
+      let+ identity_map = resolve_identity_map identity_map in
+      Trusted_environment {variable; identity_map}
+   | Bearer_jwt {jwk; identity_map} ->
+      let+ identity_map = resolve_identity_map identity_map in
+      Bearer_jwt {jwk; identity_map}
   in
   let resolve_rule (cond, meth) =
     let+ meth = resolve_meth meth in
@@ -98,8 +100,8 @@ let denote_path_template template input_value =
       let extract_identity = function
        | [] ->
           let identity_material = {
-            prefix = template.prefix;
-            attribute = template.attribute;
+            source = template.source;
+            attribute_type = template.attribute_type;
             value = output_value;
           } in
           Lwt.return (Unregistered identity_material)
@@ -111,7 +113,7 @@ let denote_path_template template input_value =
             >>= fun () ->
           Lwt.return (Terminate "Multiple registrations.")
       in
-      Entity.image1_eq template.attribute output_value template.prefix
+      Entity.image1_eq template.attribute_type output_value template.source
         >|= Entity.Set.elements
         >>= extract_identity)
 [@@warning "-45"]
@@ -168,29 +170,29 @@ let auth_jwt jwk identity data =
 let denote_authentication_method ~request_info =
   let open Sociaweb_config in
   function
-   | Trusted_header {header; identity} ->
+   | Trusted_header {header; identity_map} ->
       let frame = Ocsigen_request_info.http_frame request_info in
       (match Ocsigen_headers.find header frame with
        | value ->
           Log.debug (fun f -> f "Authenticating %s from trusted header." value)
             >>= fun () ->
-          denote_path_template identity value
+          denote_path_template identity_map value
        | exception Not_found -> Lwt.return Unauthenticated)
-   | Trusted_environment {variable; identity} ->
+   | Trusted_environment {variable; identity_map} ->
       (match Unix.getenv variable with
        | value ->
           Log.debug (fun f -> f "Authenticated %s from $%s." value variable)
             >>= fun () ->
-          denote_path_template identity value
+          denote_path_template identity_map value
        | exception Not_found -> Lwt.return Unauthenticated)
    | Fixed {identity} ->
       Log.debug (fun f -> f "Authenticating fixed user.") >>= fun () ->
       Lwt.return (Authenticated identity)
-   | Bearer_jwt {jwk; identity} ->
+   | Bearer_jwt {jwk; identity_map} ->
       let frame = Ocsigen_request_info.http_frame request_info in
       (match Ocsigen_headers.find "Authorization" frame with
        | exception Not_found -> Lwt.return Unauthenticated
-       | data -> auth_jwt jwk identity data)
+       | data -> auth_jwt jwk identity_map data)
 
 let denote_authentication_rule ~request_info (cond, meth) =
   if denote_condition ~request_info cond then

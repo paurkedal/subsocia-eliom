@@ -20,8 +20,8 @@ open Subsocia_connection
 type request_info = Ocsigen_extensions.Ocsigen_request_info.request_info
 
 type identity_material = {
-  prefix: Entity.t;
-  attribute: string Attribute_type.t;
+  source: Entity.t;
+  attribute_type: string Attribute_type.t;
   value: string;
 }
 

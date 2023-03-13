@@ -19,9 +19,9 @@ open Subsocia_selector_types
 
 module Decode = Decoders_yojson.Basic.Decode
 
-type ('p, 'a) path_template = {
-  prefix: 'p;
-  attribute: 'a;
+type ('p, 'a) identity_map = {
+  source: 'p;
+  attribute_type: 'a;
   value_pattern: Re.re;
   value_template: string;
 }
@@ -42,15 +42,15 @@ type ('p, 'a) authentication_method =
     }
   | Trusted_header of {
       header: string;
-      identity: ('p, 'a) path_template;
+      identity_map: ('p, 'a) identity_map;
     }
   | Trusted_environment of {
       variable: string;
-      identity: ('p, 'a) path_template;
+      identity_map: ('p, 'a) identity_map;
     }
   | Bearer_jwt of {
       jwk: Jose.Jwk.public Jose.Jwk.t;
-      identity: ('p, 'a) path_template;
+      identity_map: ('p, 'a) identity_map;
     }
 
 type t = {
@@ -109,20 +109,20 @@ let path_decoder =
   try succeed (Subsocia_selector.selector_of_string sel) with
    | Invalid_argument msg -> fail msg
 
-let path_template_decoder =
-  let default_prefix = Subsocia_selector.selector_of_string "/auth/default" in
+let identity_map_decoder =
   let default_value_pattern = Re.(compile (rep any)) in
   let default_value_template = "${0}" in
   let open Decode in
-  let* prefix = field_opt_or ~default:default_prefix "prefix" path_decoder in
-  let* attribute = field_opt_or ~default:"unique_name" "attribute" string in
+  let* source = field "source" path_decoder in
+  let* attribute_type =
+    field_opt_or ~default:"unique_name" "attribute_type" string in
   let* value_pattern =
     field_opt_or ~default:default_value_pattern "value_pattern" re_decoder in
   let+ value_template =
     field_opt_or ~default:default_value_template "value_template" string in
   {
-    prefix;
-    attribute;
+    source;
+    attribute_type;
     value_pattern;
     value_template;
   }
@@ -130,14 +130,14 @@ let path_template_decoder =
 let trusted_header_decoder =
   let open Decode in
   let* header = field "header" string in
-  let+ identity = field "identity" path_template_decoder in
-  Trusted_header {header; identity}
+  let+ identity_map = field "identity_map" identity_map_decoder in
+  Trusted_header {header; identity_map}
 
 let trusted_environment_decoder =
   let open Decode in
   let* variable = field "variable" string in
-  let+ identity = field "identity" path_template_decoder in
-  Trusted_environment {variable; identity}
+  let+ identity_map = field "identity_map" identity_map_decoder in
+  Trusted_environment {variable; identity_map}
 
 let fixed_decoder =
   let open Decode in
@@ -156,8 +156,8 @@ let jwk_decoder json =
 let bearer_jwt_decoder =
   let open Decode in
   let* jwk = field "jwk" jwk_decoder in
-  let+ identity = field "identity" path_template_decoder in
-  Bearer_jwt {jwk; identity}
+  let+ identity_map = field "identity_map" identity_map_decoder in
+  Bearer_jwt {jwk; identity_map}
 
 let authentication_rule_decoder =
   let open Decode in

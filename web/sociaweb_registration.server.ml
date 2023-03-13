@@ -78,7 +78,7 @@ let () =
   let* () = Entity.set_value at_first_name first_name e_root e_new_user in
   let* () = Entity.set_value at_last_name  last_name  e_root e_new_user in
   let* () = Entity.set_value at_email      email      e_root e_new_user in
-  let+ () = Entity.set_value im.attribute im.value im.prefix e_new_user in
+  let+ () = Entity.set_value im.attribute_type im.value im.source e_new_user in
   Eliom_tools.F.html
     ~title:"Welcome"
     ~css:[["css"; "subsocia.css"]]

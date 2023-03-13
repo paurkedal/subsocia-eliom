@@ -17,9 +17,9 @@
 
 open Subsocia_selector_types
 
-type ('p, 'a) path_template = {
-  prefix: 'p;
-  attribute: 'a;
+type ('p, 'a) identity_map = {
+  source: 'p;
+  attribute_type: 'a;
   value_pattern: Re.re;
   value_template: string;
 }
@@ -40,15 +40,15 @@ type ('p, 'a) authentication_method =
     }
   | Trusted_header of {
       header: string;
-      identity: ('p, 'a) path_template;
+      identity_map: ('p, 'a) identity_map;
     }
   | Trusted_environment of {
       variable: string;
-      identity: ('p, 'a) path_template;
+      identity_map: ('p, 'a) identity_map;
     }
   | Bearer_jwt of {
       jwk: Jose.Jwk.public Jose.Jwk.t;
-      identity: ('p, 'a) path_template;
+      identity_map: ('p, 'a) identity_map;
     }
 
 type t = {
