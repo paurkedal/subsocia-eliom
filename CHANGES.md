@@ -1,5 +1,14 @@
 # Change Log
 
+## 0.19.0
+
+  - Revise authentication and configuration, adding support for JWT and
+    trusted environment variables.
+  - Don't restrict attribute source entities to covers.
+  - Use `Iso639` directly, instead of `Panograph_i18n`.
+  - Collate display names in entity list using Confero.
+  - Switch to the LGPL-3.0 Linking Exception.
+
 ## 0.18.2
 
   - Support js\_of\_ocaml 3.7.
