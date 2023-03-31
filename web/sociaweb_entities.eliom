@@ -300,7 +300,8 @@ let render_inclusions ~cri ?(enable_edit = true) ent =
 
 (* Handlers *)
 
-let default_entity_sel = selector_of_string Sociaweb_config.default_entity#get
+let default_entity_sel =
+  selector_of_string Sociaweb_config.(global.default_entity)
 
 let entity_handler entity_id_opt () =
   let* cri = authenticate_cri () in
@@ -318,7 +319,7 @@ let entity_handler entity_id_opt () =
   let* e = entity_for_view ~operator:cri.cri_operator entity_id in
   let* enable_edit =
     (* TODO: Infer from permissions or explicit request. *)
-    (match Sociaweb_config.member_types#get with
+    (match Sociaweb_config.(global.member_types) with
      | [] -> Lwt.return_true
      | ets ->
         Entity.entity_type e

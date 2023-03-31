@@ -14,11 +14,12 @@
     <extension findlib-package="caqti"/>
     <extension findlib-package="caqti-driver-postgresql"/>
     <extension findlib-package="caqti-lwt"/>
-    <extension findlib-package="config-file"/>
+    <extension findlib-package="decoders-yojson"/>
     <extension findlib-package="confero"/>
     <extension findlib-package="confero.ducet"/>
     <extension findlib-package="eliom.server"/>
     <extension findlib-package="fmt"/>
+    <extension findlib-package="jose"/>
     <extension findlib-package="js_of_ocaml.deriving"/>
     <extension findlib-package="lwt"/>
     <extension findlib-package="lwt_log.core"/>
@@ -31,6 +32,7 @@
     <extension findlib-package="prime.unstable"/>
     <extension findlib-package="ptime"/>
     <extension findlib-package="ptime.clock.os"/>
+    <extension findlib-package="re"/>
     <extension findlib-package="react"/>
     <extension findlib-package="subsocia"/>
     <extension findlib-package="subsocia.data"/>

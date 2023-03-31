@@ -1,4 +1,4 @@
-(* Copyright (C) 2015--2022  Petter A. Urkedal <paurkedal@gmail.com>
+(* Copyright (C) 2015--2023  Petter A. Urkedal <paurkedal@gmail.com>
  *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -17,24 +17,28 @@
 
 open Subsocia_connection
 
-type authenticalia = {
-  auth_method : string;
-  auth_identity : string;
+type request_info = Ocsigen_extensions.Ocsigen_request_info.request_info
+
+type identity_material = {
+  source: Entity.t;
+  attribute_type: string Attribute_type.t;
+  value: string;
 }
 
-val authentication_hook : (unit -> authenticalia option Lwt.t) list ref
-val updating_autoreg_hook : (authenticalia -> Entity.t option Lwt.t) list ref
-val oneshot_autoreg_hook : (authenticalia -> Entity.t option Lwt.t) list ref
+type authenticator_result =
+  | Authenticated of Entity.t
+  | Unregistered of identity_material
+  | Unauthenticated
+  | Terminate of string
 
-val get_authenticalia_opt : unit -> authenticalia option Lwt.t
+val authentication_hook :
+  (request_info -> authenticator_result Lwt.t) list ref
+val post_authentication_hook :
+  (request_info -> authenticator_result -> authenticator_result Lwt.t) list ref
+val registration_hook :
+  (request_info -> identity_material -> authenticator_result Lwt.t) list ref
 
-val get_authenticalia : unit -> authenticalia Lwt.t
-
-val entity_of_authenticalia : authenticalia -> Entity.t option Lwt.t
-
-val set_authenticalia : Entity.t -> authenticalia -> unit Lwt.t
-
-val autoreg_entity_of_authenticalia : authenticalia -> Entity.t option Lwt.t
+val get_authenticator_result : unit -> authenticator_result Lwt.t
 
 val get_operator_opt : unit -> Entity.t option Lwt.t
 

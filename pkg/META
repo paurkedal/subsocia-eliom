@@ -8,10 +8,11 @@ package "server" (
   requires = "
     caqti
     caqti-lwt
-    config-file
     confero
+    decoders-yojson
     eliom.server
     fmt
+    jose
     js_of_ocaml.deriving
     logs
     logs.lwt
@@ -24,6 +25,7 @@ package "server" (
     prime.unstable
     ptime
     ptime.clock.os
+    re
     react
     subsocia
     subsocia.data

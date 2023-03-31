@@ -10,9 +10,10 @@ depends: [
   "caqti"
   "caqti-lwt"
   "confero"
-  "config-file"
+  "decoders-yojson"
   "eliom" {>= "6.6" & < "7.0~"}
   "fmt"
+  "jose"
   "js_of_ocaml" {>= "3.3"}
   "js_of_ocaml-ppx"
   "js_of_ocaml-ppx_deriving_json"
@@ -25,6 +26,7 @@ depends: [
   "panograph"
   "prime"
   "ptime"
+  "re"
   "react"
   "subsocia" {>= "0.18~"}
   "topkg" {build}
