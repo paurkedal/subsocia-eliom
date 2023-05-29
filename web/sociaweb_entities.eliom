@@ -17,8 +17,9 @@
 
 open%shared Eliom_content.Html
 open%client Js_of_ocaml
+open%client Js_of_ocaml_lwt
 open%shared Lwt.Infix
-open%server Lwt.Syntax
+open%shared Lwt.Syntax
 open%server Subsocia_common
 open%server Subsocia_connection
 open%server Subsocia_selector
@@ -94,11 +95,16 @@ let render_directory ~cri ~display_name entity =
     in
     (arrow_label, neigh_link)
   in
-  let postprocess_adjacencies rels_by_e =
+  let postprocess_adjacencies render rels_by_e =
+    let n = Entity.Map.cardinal rels_by_e in
+    if n > Sociaweb_config.(global.adjacency_limit) then
+      Lwt.return [render ("⋮", Fmt.kstr F.txt " %d entities" n)]
+    else
     rels_by_e
       |> Entity.Map.bindings
       |> Lwt_list.map_p extract_adjacency
       >|= List.sort (fun (a, _) (b, _) -> Confero.collate ~total:true a b)
+      >|= List.map render
   in
   let render_arrow arrow_label =
     F.span ~a:[F.a_class ["soc-arrow"]] [
@@ -113,13 +119,11 @@ let render_directory ~cri ~display_name entity =
   in
   let* unique_preimages =
     Entity.unique_relations_by_preimage entity
-      >>= postprocess_adjacencies
-      >|= List.map render_preimage
+      >>= postprocess_adjacencies render_preimage
   in
   let+ unique_images =
     Entity.unique_relations_by_image entity
-      >>= postprocess_adjacencies
-      >|= List.map render_image
+      >>= postprocess_adjacencies render_image
   in
   F.div ~a:[F.a_class ["soc-directory"]] [
     F.table ~a:[F.a_class ["soc-arrows"]] [
@@ -186,7 +190,7 @@ let render_attributions ~cri ent =
   let+ attr_trss = Entity.Set.fold_s attr_aux ubs [] in
   let sep_tr = F.tr ~a:[F.a_class ["soc-sep"]] [F.td ~a:[F.a_colspan 2] []] in
   if attr_trss = [] then
-    F.p [F.txt "There are now incoming attributions."]
+    F.p [F.txt "There are no incoming attributes."]
   else
     F.table ~a:[F.a_class ["soc-attributions"]]
       (List.flatten (Prime_list.interfix [sep_tr] attr_trss))
@@ -241,17 +245,43 @@ let candidate_dsupers ~cri focus =
     >>= Lwt_list.map_p extract
     >|= List.sort compare
 
-let render_dsuper_add ~cri focus =
-  let* focus_id = Entity.soid focus in
-  let+ csupers = candidate_dsupers ~cri focus in
-  let render_option (name, id) =
+let candidate_dsupers_sf =
+  Eliom_client.server_function [%json: int32] @@ fun focus_id ->
+  let* cri = authenticate_cri () in
+  let* focus = entity_for_view ~operator:cri.cri_operator focus_id in
+  candidate_dsupers ~cri focus
+
+let%shared render_candidates names_and_ids =
+  let make_option (name, id) =
     F.option ~a:[F.a_value (Int32.to_string id)] (F.txt name)
   in
-  let select =
-    D.select (
-      F.option ~a:[F.a_value "0"] (F.txt "") ::
-      List.map render_option csupers
-    )
+  F.option ~a:[F.a_value "0"] (F.txt "") ::
+  List.map make_option names_and_ids
+
+let render_dsuper_add ~cri focus =
+  let* focus_id = Entity.soid focus in
+  let+ select =
+    if Sociaweb_config.(global.postpone_candidates) then
+      Lwt.return
+        (D.select [F.option ~a:[F.a_value ""] (F.txt "(click to load)")])
+    else
+    let+ csupers = candidate_dsupers ~cri focus in
+    D.select (render_candidates csupers)
+  in
+  let _ : unit Eliom_client_value.t =
+    if not Sociaweb_config.(global.postpone_candidates) then [%client ()] else
+    [%client
+      Lwt.async begin fun () ->
+        let select_dom = To_dom.of_select ~%select in
+        let* _ = Lwt_js_events.click select_dom in
+        select_dom##.classList##add (Js.string "soc-loading");
+        let+ csupers = ~%candidate_dsupers_sf ~%focus_id in
+        let options = render_candidates csupers in
+        Manip.replaceChildren ~%select options;
+        select_dom##.classList##remove (Js.string "soc-loading");
+        select_dom##focus
+      end
+    ]
   in
   let handler =
     [%client
@@ -266,7 +296,7 @@ let render_dsuper_add ~cri focus =
   let button =
     F.button ~a:[F.a_button_type `Button; F.a_onclick handler] [F.txt "+"]
   in
-  [button; select]
+  [button; (select :> Html_types.td_content_fun D.elt)]
 
 let render_dsuper_rw ~cri focus =
   let* dsupers = Entity.dsuper focus in

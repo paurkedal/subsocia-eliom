@@ -127,6 +127,8 @@ table.soc-attributions tr td:first-child {
 }
 ul.soc-values { list-style: none; margin: 0; padding: 0; }
 
+.soc-loading { cursor: wait; }
+
 /* Color scheme */
 .soc-dsuper1 td, .soc-dsuper1 span { color: #000; border: dashed thin #000; }
 .soc-dsuper1 a	{ color: #000; }

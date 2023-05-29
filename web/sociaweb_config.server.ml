@@ -59,6 +59,8 @@ type t = {
   default_entity: string;
   completion_cutoff: float;
   completion_limit: int;
+  adjacency_limit: int;
+  postpone_candidates: bool;
   change_log: string option;
   authentication_rules: (condition * (selector, string) authentication_method) list;
 }
@@ -182,6 +184,9 @@ let decoder =
   let* completion_cutoff =
     field_opt_or ~default:0.001 "completion_cutoff" float in
   let* completion_limit = field_opt_or ~default:10 "completion_limit" int in
+  let* adjacency_limit = field_opt_or ~default:25 "adjacency_limit" int in
+  let* postpone_candidates =
+    field_opt_or ~default:false "postpone_candidates" bool in
   let* change_log = field_opt "change_log" string in
   let+ authentication_rules =
     field "authentication_rules" (list authentication_rule_decoder) in
@@ -191,6 +196,8 @@ let decoder =
     default_entity;
     completion_cutoff;
     completion_limit;
+    adjacency_limit;
+    postpone_candidates;
     change_log;
     authentication_rules;
   }

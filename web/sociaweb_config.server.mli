@@ -70,6 +70,11 @@ type t = {
   (** Maximum number of results to return for full-text search in web
       interface. *)
 
+  adjacency_limit: int;
+  (** Maximum number of adjacent entities to show in the directory. *)
+
+  postpone_candidates: bool;
+
   change_log: string option;
   (** If set, the path to which to log Subsocia changes requested though the web
       interface.  A relative path is taken to be relative to the OCSIGEN log
