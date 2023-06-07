@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.20.0
+
+  - Revised web interface to show more structure, esp. paths.
+  - Optionally postpone loading of candidate superentites.
+
 ## 0.19.0
 
   - Revise authentication and configuration, adding support for JWT and
