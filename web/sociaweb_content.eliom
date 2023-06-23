@@ -35,6 +35,9 @@
     module Entity = struct
       type soid = int32
     end
+    module Entity_type = struct
+      type soid = int32
+    end
   end
 ]
 
@@ -131,7 +134,7 @@ let%client completed
   ~%(server_function [%json: int32 option * int32 option * string] completed)
 
 let entity_completion_input ?entity_type ?super emit =
-  let* entity_type_id = Pwt_option.map_s Entity.soid entity_type in
+  let* entity_type_id = Pwt_option.map_s Entity_type.soid entity_type in
   let+ super_id = Pwt_option.map_s Entity.soid super in
   let complete =
     [%client fun s -> complete (~%entity_type_id, ~%super_id, s)]
