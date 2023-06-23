@@ -22,7 +22,7 @@ open Subsocia_connection
 
 module Log = (val Logs_lwt.src_log (Logs.Src.create "sociaweb.auth"))
 
-type request_info = Ocsigen_extensions.Ocsigen_request_info.request_info
+type request_info = Ocsigen_request.t
 
 type identity_material = {
   source: Entity.t;
@@ -48,7 +48,10 @@ let post_authentication_hook = ref []
 let registration_hook = ref []
 
 let http_error code msg =
-  Lwt.fail (Ocsigen_http_frame.Http_error.Http_exception (code, Some msg, None))
+  (match Cohttp.Code.status_of_code code with
+   | #Cohttp.Code.status as status ->
+      Lwt.fail (Ocsigen_cohttp.Ext_http_error (status, Some msg, None))
+   | `Code _ -> assert false)
 
 let authentication_rules =
   let open Sociaweb_config in
@@ -125,13 +128,13 @@ let rec denote_condition ~request_info =
    | And cs -> List.for_all (denote_condition ~request_info) cs
    | Or cs -> List.exists (denote_condition ~request_info) cs
    | Has_header (header, pattern) ->
-      let frame = Ocsigen_request_info.http_frame request_info in
-      (match Ocsigen_headers.find header frame with
-       | value -> Re.execp pattern value
-       | exception Not_found -> false)
+      let header = Ocsigen_header.Name.of_string header in
+      (match Ocsigen_request.header request_info header with
+       | Some value -> Re.execp pattern value
+       | None -> false)
    | Has_remote_ip prefix ->
       let address =
-        Ipaddr.of_string_exn (Ocsigen_request_info.remote_ip request_info)
+        Ipaddr.of_string_exn (Ocsigen_request.remote_ip request_info)
       in
       Ipaddr.Prefix.mem address prefix
 
@@ -171,13 +174,13 @@ let denote_authentication_method ~request_info =
   let open Sociaweb_config in
   function
    | Trusted_header {header; identity_map} ->
-      let frame = Ocsigen_request_info.http_frame request_info in
-      (match Ocsigen_headers.find header frame with
-       | value ->
+      let header = Ocsigen_header.Name.of_string header in
+      (match Ocsigen_request.header request_info header with
+       | Some value ->
           Log.debug (fun f -> f "Authenticating %s from trusted header." value)
             >>= fun () ->
           denote_path_template identity_map value
-       | exception Not_found -> Lwt.return Unauthenticated)
+       | None -> Lwt.return Unauthenticated)
    | Trusted_environment {variable; identity_map} ->
       (match Unix.getenv variable with
        | value ->
@@ -189,10 +192,9 @@ let denote_authentication_method ~request_info =
       Log.debug (fun f -> f "Authenticating fixed user.") >>= fun () ->
       Lwt.return (Authenticated identity)
    | Bearer_jwt {jwk; identity_map} ->
-      let frame = Ocsigen_request_info.http_frame request_info in
-      (match Ocsigen_headers.find "Authorization" frame with
-       | exception Not_found -> Lwt.return Unauthenticated
-       | data -> auth_jwt jwk identity_map data)
+      (match Ocsigen_request.header request_info Ocsigen_header.Name.authorization with
+       | None -> Lwt.return Unauthenticated
+       | Some data -> auth_jwt jwk identity_map data)
 
 let denote_authentication_rule ~request_info (cond, meth) =
   if denote_condition ~request_info cond then

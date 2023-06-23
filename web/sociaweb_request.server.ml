@@ -23,13 +23,12 @@ open Subsocia_connection
 open Unprime_list
 open Unprime_option
 
-let http_error code msg =
-  Lwt.fail (Ocsigen_http_frame.Http_error.Http_exception (code, Some msg, None))
+let http_error = http_error
 
 let http_redirect ~service get =
   let uri = Eliom_uri.make_string_uri ~absolute:true ~service get in
-  let hdrs = Http_headers.empty |> Http_headers.(add location) uri in
-  Lwt.fail (Ocsigen_http_frame.Http_error.Http_exception (302, None, Some hdrs))
+  let hdrs = Cohttp.Header.init_with "Location" uri in
+  Lwt.fail (Ocsigen_cohttp.Ext_http_error (`Found, None, Some hdrs))
 
 (* Request Info *)
 

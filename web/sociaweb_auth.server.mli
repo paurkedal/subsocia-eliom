@@ -17,7 +17,7 @@
 
 open Subsocia_connection
 
-type request_info = Ocsigen_extensions.Ocsigen_request_info.request_info
+type request_info = Ocsigen_request.t
 
 type identity_material = {
   source: Entity.t;
@@ -45,3 +45,7 @@ val get_operator_opt : unit -> Entity.t option Lwt.t
 val get_operator : unit -> Entity.t Lwt.t
 
 val authenticate : unit -> Entity.t Lwt.t
+
+(**/**)
+val http_error : int -> string -> 'a Lwt.t
+(**/**)

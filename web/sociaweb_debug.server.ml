@@ -1,4 +1,4 @@
-(* Copyright (C) 2015--2022  Petter A. Urkedal <paurkedal@gmail.com>
+(* Copyright (C) 2015--2023  Petter A. Urkedal <paurkedal@gmail.com>
  *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -25,18 +25,15 @@ let debug_service =
 let _ =
   Eliom_registration.Html.register ~service:debug_service
     (fun () () ->
-      let ri = Eliom_request_info.get_ri () in
-      let frame = Ocsigen_extensions.Ocsigen_request_info.http_frame ri in
-      let fh = frame.Ocsigen_http_frame.frame_header in
-      let hdrs = Ocsigen_http_frame.Http_header.get_headers fh in
-      let tr_of_header name vs =
-        F.tr [F.td [F.txt (Http_headers.name_to_string name)];
-              F.td (List.map (fun s -> F.div [F.txt s]) vs)]
+      let headers = Eliom_request_info.get_ri ()
+        |> Ocsigen_request.to_cohttp
+        |> Cohttp.Request.headers
       in
+      let tr_of_header name s = F.tr [F.td [F.txt name]; F.td [F.txt s]] in
       Lwt.return @@ Eliom_tools.F.html ~title:"HTTP Headers" @@ F.body [
         F.table ~a:[F.a_class ["std"]]
           (List.rev
-            (Http_headers.fold
+            (Cohttp.Header.fold
               (fun name vs acc -> tr_of_header name vs :: acc)
-              hdrs []))
+              headers []))
       ])

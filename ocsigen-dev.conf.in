@@ -9,8 +9,8 @@
     <commandpipe>_var/run/command.pipe</commandpipe>
 
     <extension findlib-package="ocsigenserver.ext.staticmod"/>
-    <extension findlib-package="ocsigenserver.ext.ocsipersist-sqlite"/>
     <extension findlib-package="ocsigenserver.ext.redirectmod"/>
+    <extension findlib-package="ocsipersist.sqlite"/>
     <extension findlib-package="caqti"/>
     <extension findlib-package="caqti-driver-postgresql"/>
     <extension findlib-package="caqti-lwt"/>
