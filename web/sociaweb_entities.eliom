@@ -27,9 +27,13 @@ open%server Unprime
 
 open%server Sociaweb_auth
 open%server Sociaweb_request
-open%shared Sociaweb_content
+open%server Sociaweb_content
 open%shared Sociaweb_server
 open%shared Sociaweb_services
+
+module%client Subsocia_connection = struct
+  module Entity = struct type soid = int32 end
+end
 
 let collate x y = Confero.collate ~total:true x y
 

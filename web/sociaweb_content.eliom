@@ -20,13 +20,11 @@
   open Unprime_list
 ]
 [%%server
-  open Lwt.Infix
   open Lwt.Syntax
   open Eliom_client
   open Sociaweb_auth
   open Sociaweb_services
   open Subsocia_connection
-  open Unprime_option
 ]
 [%%client
   (* Dummy implementation for the client needed for server-client type checking,
@@ -119,6 +117,7 @@ let%client complete
     (string * int32) list Panui_result.t Lwt.t =
   ~%(server_function [%json: int32 option * int32 option * string] complete)
 
+(*
 let completed (entity_type_id, super_id, str) =
   let* res =
     Lwt_result.bind_lwt
@@ -132,6 +131,7 @@ let completed (entity_type_id, super_id, str) =
 let%client completed
     : int32 option * int32 option * string -> int32 option Lwt.t =
   ~%(server_function [%json: int32 option * int32 option * string] completed)
+*)
 
 let entity_completion_input ?entity_type ?super emit =
   let* entity_type_id = Pwt_option.map_s Entity_type.soid entity_type in
