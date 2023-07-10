@@ -144,11 +144,6 @@ let render_directory ~cri ~display_name entity =
 
 (* Attributions *)
 
-let rec fold_closure_from f dsucc x acc =
-  let* xs = dsucc x in
-  let+ acc = Entity.Set.fold_s (fold_closure_from f dsucc) xs acc in
-  f x acc
-
 let render_attribution ~cri target source =
   let* target_type = Entity.entity_type target in
   let* source_type = Entity.entity_type source in
@@ -187,10 +182,7 @@ let render_attributions ~cri ent =
     render_attribution ~cri ent ub
       >|= function None -> acc | Some trs -> trs :: acc
   in
-  let* ubs =
-    fold_closure_from
-      Entity.Set.add (Entity.preimage1 Relation.True) ent Entity.Set.empty
-  in
+  let* ubs = Entity.preimage1 Relation.True ent in
   let+ attr_trss = Entity.Set.fold_s attr_aux ubs [] in
   let sep_tr = F.tr ~a:[F.a_class ["soc-sep"]] [F.td ~a:[F.a_colspan 2] []] in
   if attr_trss = [] then
