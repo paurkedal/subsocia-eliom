@@ -33,4 +33,3 @@ depends: [
 ]
 build: ["ocaml" "pkg/pkg.ml" "build" "--pinned" "%{pinned}%"]
 dev-repo: "git+https://github.com/paurkedal/subsocia-eliom.git"
-synopsis: "Web interface for Subsocia running under ocsigenserver"
