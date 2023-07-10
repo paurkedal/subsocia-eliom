@@ -1,5 +1,11 @@
 # Change Log
 
+## 0.20.1
+
+  - Fixed handling of the `?entity_type` argument of
+    `entity_completion_input`.
+  - Fixed rendering of attributions, including a unbouded recursion.
+
 ## 0.20.0
 
   - Revised web interface to show more structure, esp. paths.
