@@ -150,25 +150,22 @@ let render_attribution ~cri target source =
   let* ats = Entity_type.allowed_attributes source_type target_type in
   let ats = Attribute_type.Set.elements ats in
   let render_tr (Attribute_type.Any at) =
-    let* an = Attribute_type.name at in
-    let+ value_frag =
-      let+ values = Entity.get_values at source target in
-      (match Values.elements values with
-       | [] ->
-          [F.span ~a:[F.a_class ["soc-value"; "none"]] [F.txt "-"]]
-       | values ->
-          let t = Attribute_type.value_type at in
-          let render_value v = F.li [F.txt (Value.typed_to_string t v)] in
-          [F.ul ~a:[F.a_class ["soc-values"]] (List.map render_value values)])
+    let* values = Entity.get_values at source target >|= Values.elements in
+    if values = [] then Lwt.return_none else
+    let+ an = Attribute_type.name at in
+    let value_frag =
+      let t = Attribute_type.value_type at in
+      let render_value v = F.li [F.txt (Value.typed_to_string t v)] in
+      [F.ul ~a:[F.a_class ["soc-values"]] (List.map render_value values)]
     in
     let mult_class =
       (match Attribute_type.value_mult at with
        | May1 -> "may1" | May -> "may"
        | Must1 -> "must1" | Must -> "must")
     in
-    F.tr ~a:[F.a_class [mult_class]] [F.td [F.txt an]; F.td value_frag]
+    Some (F.tr ~a:[F.a_class [mult_class]] [F.td [F.txt an]; F.td value_frag])
   in
-  let* attr_trs = Lwt_list.map_s render_tr ats in
+  let* attr_trs = Lwt_list.filter_map_s render_tr ats in
   let* source_type_name = Entity_type.name source_type in
   let+ source_type_link = entity_link ~langs:cri.cri_langs source in
   if attr_trs = [] then
