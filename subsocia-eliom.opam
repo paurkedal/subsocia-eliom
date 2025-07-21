@@ -11,7 +11,7 @@ depends: [
   "caqti-lwt"
   "confero"
   "decoders-yojson"
-  "eliom" {>= "8.9.0" & < "11.0.0~"}
+  "eliom" {>= "8.9.0" & < "12.0.0~"}
   "fmt"
   "jose"
   "js_of_ocaml" {>= "3.3"}
