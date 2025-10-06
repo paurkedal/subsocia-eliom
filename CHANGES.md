@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.21.0
+
+  - Upgrade to recent Eliom releases.
+
 ## 0.20.1
 
   - Fixed handling of the `?entity_type` argument of
