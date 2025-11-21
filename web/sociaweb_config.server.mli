@@ -29,7 +29,9 @@ type condition =
   | And of condition list
   | Or of condition list
   | Has_header of string * Re.re
+(*
   | Has_remote_ip of Ipaddr.Prefix.t
+*)
 
 val true_ : condition
 val false_ : condition

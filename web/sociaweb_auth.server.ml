@@ -132,11 +132,13 @@ let rec denote_condition ~request_info =
       (match Ocsigen_request.header request_info header with
        | Some value -> Re.execp pattern value
        | None -> false)
+(*
    | Has_remote_ip prefix ->
       let address =
         Ipaddr.of_string_exn (Ocsigen_request.remote_ip request_info)
       in
       Ipaddr.Prefix.mem address prefix
+*)
 
 let auth_jwt jwk identity data =
   (match String.split_on_char ' ' data |> List.filter ((<>) "") with

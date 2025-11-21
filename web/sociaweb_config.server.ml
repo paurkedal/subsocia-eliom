@@ -31,7 +31,9 @@ type condition =
   | And of condition list
   | Or of condition list
   | Has_header of string * Re.re
+(*
   | Has_remote_ip of Ipaddr.Prefix.t
+*)
 
 let true_ = And []
 let false_ = Or []
@@ -72,12 +74,14 @@ let re_decoder =
    | Re.Perl.Parse_error -> fail "invalid regular expression"
    | Re.Perl.Not_supported -> fail "unsupported regular expression"
 
+(*
 let ipaddr_prefix_decoder =
   let open Decode in
   string
     >|= Ipaddr.Prefix.of_string
     >|= Result.map_error (function `Msg msg -> Decoders.Error.make msg)
     >>= from_result
+*)
 
 let condition_decoder =
   let re_anything = Re.(compile bos) in
@@ -97,9 +101,11 @@ let condition_decoder =
         let* header = field "header" string in
         let+ pattern = field_opt_or ~default:re_anything "pattern" re_decoder in
         Has_header (header, pattern)
+(*
      | "has-remote-ip" ->
         let+ prefix = field "prefix" ipaddr_prefix_decoder in
         Has_remote_ip prefix
+*)
      | _ ->
         fail "Invalid test.")
   in
