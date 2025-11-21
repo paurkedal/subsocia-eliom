@@ -24,6 +24,8 @@ open Subsocia_selector
 open Printf
 open Unprime_list
 
+module Log = (val (Logs_lwt.src_log (Logs.Src.create "sociaweb")))
+
 let allowed_attributes = lazy
   (List.fold String_set.add Sociaweb_config.(global.restapi_allowed_attributes)
              String_set.empty)
@@ -80,9 +82,9 @@ let restapi_service =
 let _ =
   Eliom_registration.Any.register ~service:restapi_service
     @@ fun (subject, (must, (may, query))) () ->
-  Lwt_log.debug_f
-    "Checking %s against [%s] and optional [%s] groups"
-    subject (String.concat ", " must) (String.concat ", " may) >>= fun () ->
+  Log.debug (fun f ->
+    f "Checking %s against [%s] and optional [%s] groups"
+      subject (String.concat ", " must) (String.concat ", " may)) >>= fun () ->
   let* root = Entity.get_root () in
   let allowed_ans = Lazy.force allowed_attributes in
   let* must_ok, may_ok, query_res =

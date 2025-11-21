@@ -12,7 +12,6 @@ true: bin_annot, eliom_ppx
     package(logs), \
     package(logs.lwt), \
     package(lwt), \
-    package(lwt_log.core), \
     package(panograph), \
     package(panograph.server), \
     package(prime), \
@@ -31,7 +30,6 @@ true: bin_annot, eliom_ppx
     package(js_of_ocaml), \
     package(js_of_ocaml-ppx), \
     package(lwt), \
-    package(lwt_log.core), \
     package(panograph), \
     package(panograph.client), \
     package(prime), \

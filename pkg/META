@@ -17,7 +17,6 @@ package "server" (
     logs
     logs.lwt
     lwt
-    lwt_log.core
     lwt_ppx
     panograph
     panograph.server
