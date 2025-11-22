@@ -1,4 +1,4 @@
-(* Copyright (C) 2015--2023  Petter A. Urkedal <paurkedal@gmail.com>
+(* Copyright (C) 2015--2025  Petter A. Urkedal <paurkedal@gmail.com>
  *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -23,7 +23,7 @@ open Subsocia_connection
 
 module Sociaweb_app = Eliom_registration.App
   (struct
-    let application_name = "sociaweb_app"
+    let application_name = "subsocia_eliom_module"
     let global_data_path = None
   end)
 

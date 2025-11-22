@@ -1,0 +1,102 @@
+(dirs client tools static)
+
+(library
+ (name subsocia_eliom_server)
+ (public_name subsocia-eliom.server)
+ (wrapped false)
+ (modules
+    sociaweb_auth
+    sociaweb_config
+    sociaweb_logging
+    sociaweb_request)
+ (libraries
+    caqti
+    caqti-lwt
+    confero
+    decoders-yojson
+    eliom.server
+    fmt
+    jose
+    js_of_ocaml-ppx_deriving_json
+    logs
+    logs.lwt
+    lwt
+    panograph
+    panograph.server
+    prime
+    prime.unstable
+    ptime
+    ptime.clock.os
+    re
+    re.perl
+    re.pcre
+    react
+    subsocia
+    subsocia.data))
+
+(library
+ (name subsocia_eliom_module)
+ (public_name subsocia-eliom.module)
+ (wrapped false)
+ (preprocess (pps eliom.ppx.server js_of_ocaml-ppx_deriving_json))
+ (modules
+    sociaweb_content
+    sociaweb_entities
+    sociaweb_registration
+    sociaweb_restapi
+    sociaweb_server
+    sociaweb_services)
+ (private_modules
+    sociaweb_content
+    sociaweb_entities
+    sociaweb_registration
+    sociaweb_restapi
+    sociaweb_server
+    sociaweb_services)
+ (libraries
+    caqti
+    caqti-lwt
+    confero
+    decoders-yojson
+    eliom.server
+    fmt
+    jose
+    js_of_ocaml-ppx_deriving_json
+    logs
+    logs.lwt
+    lwt
+    panograph
+    panograph.server
+    prime
+    prime.unstable
+    ptime
+    ptime.clock.os
+    re
+    re.perl
+    re.pcre
+    react
+    subsocia
+    subsocia.data
+    subsocia_eliom_server))
+
+(library
+ (name subsocia_eliom_debug_module)
+ (public_name subsocia-eliom.debug-module)
+ (wrapped false)
+ (modules
+    sociaweb_debug)
+ (libraries
+    eliom.server))
+
+(rule
+ (aliases all runtest)
+ (deps
+    tools/check_modules.ml
+    client/subsocia_eliom_module.bc
+    client/subsocia_eliom_module.bc.js
+    subsocia_eliom_module.cma)
+ (action (run %{ocaml} -I +unix -I +str tools/check_modules.ml subsocia_eliom_module)))
+
+(rule
+ (deps tools/gen_client_dune.ml)
+ (action (with-stdout-to dune.client (run %{ocaml} %{deps}))))

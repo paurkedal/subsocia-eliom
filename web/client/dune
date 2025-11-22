@@ -1,0 +1,23 @@
+(executable
+ (name subsocia_eliom_module)
+ (modes js byte)
+ (preprocess (pps js_of_ocaml-ppx))
+ (js_of_ocaml)
+ (libraries
+    eliom.client
+    js_of_ocaml
+    js_of_ocaml-ppx
+    lwt
+    panograph
+    panograph.client
+    prime
+    prime.unstable
+    react
+    subsocia))
+
+(dynamic_include ../dune.client)
+
+(install
+ (package subsocia-eliom)
+ (section share)
+ (files (subsocia_eliom_module.bc.js as static/subsocia_eliom_module.js)))

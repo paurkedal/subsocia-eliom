@@ -6,11 +6,11 @@ license: "LGPL-3.0-or-later WITH LGPL-3.0-linking-exception"
 homepage: "https://github.com/paurkedal/subsocia-eliom/"
 bug-reports: "https://github.com/paurkedal/subsocia-eliom/issues"
 depends: [
-  "adpkg" {build}
   "caqti"
   "caqti-lwt"
   "confero"
   "decoders-yojson"
+  "dune"
   "eliom" {>= "8.9.0" & < "12.0.0~"}
   "fmt"
   "jose"
@@ -20,15 +20,17 @@ depends: [
   "lwt"
   "logs"
   "ocaml"
-  "ocamlbuild" {build}
-  "ocamlfind"
   "panograph"
   "prime"
   "ptime"
   "re"
   "react"
   "subsocia" {>= "0.18~"}
-  "topkg" {build}
 ]
-build: ["ocaml" "pkg/pkg.ml" "build" "--pinned" "%{pinned}%"]
+build: [
+  ["dune" "build" "-p" name "-j" jobs "@install"]
+  ["dune" "install" "-p" name "--create-install-file" name]
+  ["dune" "runtest" "-p" name "-j" jobs] {with-test}
+  ["dune" "build" "@doc" "-p" name "-j" jobs] {with-doc}
+]
 dev-repo: "git+https://github.com/paurkedal/subsocia-eliom.git"
