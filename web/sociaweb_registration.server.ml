@@ -1,4 +1,4 @@
-(* Copyright (C) 2015--2023  Petter A. Urkedal <paurkedal@gmail.com>
+(* Copyright (C) 2015--2025  Petter A. Urkedal <paurkedal@gmail.com>
  *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -21,7 +21,9 @@ open Lwt.Syntax
 open Sociaweb_auth
 open Sociaweb_request
 open Sociaweb_services
+open Subsocia_common
 open Subsocia_connection
+open Subsocia_selector
 
 let registration_form (first_name, (last_name, email)) =
   [F.table ~a:[F.a_class ["assoc"]] [
@@ -66,14 +68,16 @@ let () =
      | Unauthenticated -> http_error 401 "Not authenticated."
      | Terminate msg -> http_error 500 msg)
   in
-  let* at_first_name = Const.at_first_name in
-  let* at_last_name = Const.at_last_name in
-  let* at_email = Const.at_email in
+  let* at_first_name = Attribute_type.of_name_exn Type.String "first_name" in
+  let* at_last_name = Attribute_type.of_name_exn Type.String "last_name" in
+  let* at_email = Attribute_type.of_name_exn Type.String "email" in
+  let* et_person = Entity_type.of_name_exn "person" in
   let* e_root = Entity.get_root () in
-  let* et_person = Const.et_person in
   let* e_new_user = Entity.create et_person in
   let* e_new_user_id = Entity.soid e_new_user in
-  let* e_new_users = Const.e_new_users in
+  let* e_new_users =
+    Entity.select_one (selector_of_string "/default/subsocia-autoregs")
+  in
   let* () = Entity.force_dsub e_new_user e_new_users in
   let* () = Entity.set_value at_first_name first_name e_root e_new_user in
   let* () = Entity.set_value at_last_name  last_name  e_root e_new_user in
