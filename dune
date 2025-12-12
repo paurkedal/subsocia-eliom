@@ -1,0 +1,4 @@
+(rule
+ (deps ocsigen-dev.conf.in)
+ (targets ocsigen-dev.conf)
+ (action (run opam config subst %{targets})))

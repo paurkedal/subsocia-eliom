@@ -10,7 +10,10 @@
 
     <extension findlib-package="ocsigenserver.ext.staticmod"/>
     <extension findlib-package="ocsigenserver.ext.redirectmod"/>
-    <extension findlib-package="ocsipersist.sqlite"/>
+    <extension findlib-package="ocsipersist-sqlite"/>
+    <extension findlib-package="ocsipersist-sqlite-config">
+      <database file="_var/lib/ocsidb"/>
+    </extension>
     <extension findlib-package="caqti"/>
     <extension findlib-package="caqti-driver-postgresql"/>
     <extension findlib-package="caqti-lwt"/>
@@ -35,17 +38,16 @@
     <extension findlib-package="react"/>
     <extension findlib-package="subsocia"/>
     <extension findlib-package="subsocia.data"/>
-    <library module="_build/web/server/subsocia-eliom-server.cmxs"/>
+    <library module="_build/default/web/subsocia_eliom_server.cmxs"/>
 
     <host defaulthostname="localhost" hostfilter="*">
-      <static dir="@PANOGRAPH_DATADIR@/static"/>
+      <static dir="%{panograph:share}%/static"/>
       <static dir="web/static"/>
-      <static dir="_build/web/client"/>
-      <static dir="_build"/> <!-- Needed for source map. -->
-      <eliommodule module="_build/web/server/subsocia-eliom-module.cmxs"/>
-      <eliommodule module="_build/web/server/subsocia-eliom-debug-module.cmxs"/>
+      <eliommodule module="_build/default/web/subsocia_eliom_module.cmxs"/>
+      <eliommodule module="_build/default/web/subsocia_eliom_debug_module.cmxs"/>
       <redirect suburl="^/?\$" dest="http://localhost:8080/entities/self"/>
       <eliom/>
+      <static regexp="^(.*)\.js$" dest="_build/default/web/client/\1.bc.js"/>
     </host>
 
   </server>

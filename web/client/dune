@@ -2,11 +2,13 @@
  (name subsocia_eliom_module)
  (modes js byte)
  (preprocess (pps js_of_ocaml-ppx))
- (js_of_ocaml)
+ (js_of_ocaml
+  (build_runtime_flags :standard --enable use-js-string)
+  (flags :standard --enable with-js-error --enable use-js-string))
  (libraries
-    eliom.client
     js_of_ocaml
-    js_of_ocaml-ppx
+    js_of_ocaml-lwt
+    eliom.client
     lwt
     panograph
     panograph.client

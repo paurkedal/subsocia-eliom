@@ -46,13 +46,6 @@
     sociaweb_restapi
     sociaweb_server
     sociaweb_services)
- (private_modules
-    sociaweb_content
-    sociaweb_entities
-    sociaweb_registration
-    sociaweb_restapi
-    sociaweb_server
-    sociaweb_services)
  (libraries
     caqti
     caqti-lwt
