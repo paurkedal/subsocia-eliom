@@ -356,8 +356,7 @@ let entity_handler entity_id_opt () =
   let entity_changed_c = Eliom_react.Down.of_react (entity_changed entity_id) in
   ignore_cv [%client
     Lwt_react.E.keep @@ React.E.trace
-      (fun _ ->
-        Eliom_client.exit_to ~service:Eliom_service.reload_action () ())
+      (fun _ -> Dom_html.window##.location##reload)
       ~%entity_changed_c
   ];
   let do_search = [%client function
