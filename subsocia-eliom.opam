@@ -34,3 +34,4 @@ build: [
   ["dune" "build" "@doc" "-p" name "-j" jobs] {with-doc}
 ]
 dev-repo: "git+https://github.com/paurkedal/subsocia-eliom.git"
+synopsis: "Eliom module for Subsocia"

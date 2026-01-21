@@ -1,4 +1,9 @@
-# Change Log
+## v0.22.0 - 2026-01-21
+
+  - Fixed or worked around issue with downward events after Eliom upgrade.
+  - Disable has-remote-ip for now to allow using dev version of Eliom.
+  - Switched build system to dune.
+  - Switched logging to logs.
 
 ## 0.21.0
 
