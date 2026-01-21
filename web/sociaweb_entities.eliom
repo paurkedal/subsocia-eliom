@@ -44,17 +44,17 @@ module Int32_hashable = struct
 end
 module Int32_event_table = Panograph_event_table.Make (Int32_hashable)
 
-let entity_changed =
-  let event_table = Int32_event_table.create 97 in
+let reloads =
+  let stream, send = Lwt_stream.create () in
   on_entity_change begin function
    | `Force_dsub (e1, e2) | `Relax_dsub (e1, e2) | `Change_values (e1, e2) ->
       Lwt.async begin fun () ->
         let+ e1_id = Entity.soid e1 and+ e2_id = Entity.soid e2 in
-        Int32_event_table.emit event_table e1_id ();
-        Int32_event_table.emit event_table e2_id ()
+        send (Some [e1_id; e2_id])
       end
   end;
-  Int32_event_table.event event_table
+  let channel = Eliom_comet.Channel.create_newest stream in
+  channel
 
 let suggested_number_of_columns es =
   let n = List.length es in
@@ -353,12 +353,12 @@ let entity_handler entity_id_opt () =
   let* directory_div = render_directory ~cri ~display_name e in
   let* inclusions_div = render_inclusions ~enable_edit ~cri e in
   let* attributions_div = render_attributions ~cri e in
-  let entity_changed_c = Eliom_react.Down.of_react (entity_changed entity_id) in
-  ignore_cv [%client
-    Lwt_react.E.keep @@ React.E.trace
-      (fun _ -> Dom_html.window##.location##reload)
-      ~%entity_changed_c
-  ];
+  let _ : unit Eliom_client_value.t = [%client
+    let on_reload entity_ids =
+      if List.mem ~%entity_id entity_ids then Dom_html.window##.location##reload
+    in
+    Lwt.async (fun () -> Lwt_stream.iter on_reload ~%reloads)
+  ] in
   let do_search = [%client function
    | None -> Lwt_result.return ()
    | Some (_, entity_id) ->
